@@ -26,7 +26,8 @@ import {
   CanvasText,
   CanvasSlot,
   CanvasImg,
-  CanvasPlaceholder
+  CanvasPlaceholder,
+  CanvasRouterView
 } from '../builtin'
 import { NODE_UID as DESIGN_UIDKEY, NODE_TAG as DESIGN_TAGKEY, NODE_LOOP as DESIGN_LOOPID } from '../common'
 
@@ -65,6 +66,7 @@ const Mapper = {
   slot: CanvasSlot,
   Template: CanvasBox,
   Img: CanvasImg,
+  RouterView: CanvasRouterView,
   CanvasRow,
   CanvasCol,
   CanvasRowColContainer,
