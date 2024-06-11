@@ -19,11 +19,9 @@ import { initHttp } from '@opentiny/tiny-engine-http'
 import TinyThemeTool from '@opentiny/vue-theme/theme-tool'
 import { tinySmbTheme } from '@opentiny/vue-theme/theme' // SMB 主题
 import { defineEntry, mergeRegistry } from '@opentiny/tiny-engine-entry'
-import App from './App.vue'
+import App from './layout/App.vue'
 import defaultRegistry from '../registry.js'
 import { registerConfigurators } from './registerConfigurators'
-
-import 'virtual:svg-icons-register'
 
 const defaultLifeCycles = {
   beforeAppCreate: ({ registry }) => {
@@ -38,7 +36,7 @@ const defaultLifeCycles = {
     defineEntry(newRegistry)
 
     // 加载主题样式，尽早加载
-    import(`./theme/${newRegistry.config.theme}.js`)
+    // import(`./theme/${newRegistry.config.theme}.js`)
 
     initHttp({ env: import.meta.env })
 
