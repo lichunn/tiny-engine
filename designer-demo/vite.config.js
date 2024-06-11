@@ -1,11 +1,18 @@
 import path from 'node:path'
-import { defineConfig, mergeConfig } from 'vite'
-import getDefaultConfig from '@opentiny/tiny-engine/vite.config.js'
+import { defineConfig, mergeConfig, loadEnv } from 'vite'
+import { getDefaultConfig } from '@opentiny/tiny-engine-vite-config'
 
 export default defineConfig((options) => {
-  const defaultConfig = getDefaultConfig(options)
+  const envDir = path.resolve(process.cwd(), 'env')
+  const extOptions = {
+    ...loadEnv(options.mode, envDir, 'VITE_'),
+    iconDirs: [path.resolve(__dirname, './node_modules/@opentiny/tiny-engine/assets/')]
+  }
+  const defaultConfig = getDefaultConfig(options, extOptions)
 
   const devAlias = {
+    '@opentiny/tiny-engine/canvas': path.resolve(__dirname, '../packages/design-core/src/canvas/canvas.js'),
+    '@opentiny/tiny-engine': path.resolve(__dirname, '../packages/design-core/index.js'),
     '@opentiny/tiny-engine-controller/js': path.resolve(__dirname, '../packages/controller/js'),
     '@opentiny/tiny-engine-common/component': path.resolve(__dirname, '../packages/common/component'),
     '@opentiny/tiny-engine-common': path.resolve(__dirname, '../packages/common/index.js'),
@@ -56,10 +63,16 @@ export default defineConfig((options) => {
     '@opentiny/tiny-engine-builtin-component': path.resolve(__dirname, '../packages/builtinComponent/index.js'),
     '@opentiny/tiny-engine-entry': path.resolve(__dirname, '../packages/entry/src/index.js'),
     '@opentiny/tiny-engine-layout': path.resolve(__dirname, '../packages/layout/index.js'),
-    '@opentiny/tiny-engine-configurator': path.resolve(__dirname, '../packages/configurator/src/index.js')
+    '@opentiny/tiny-engine-configurator': path.resolve(__dirname, '../packages/configurator/src/index.js'),
+    '@opentiny/tiny-engine-theme': ['light', 'dark'].includes(extOptions.VITE_THEME)
+    ? path.resolve(process.cwd(), `../packages/theme/${extOptions.VITE_THEME}/index.less`)
+    // ? path.resolve(process.cwd(), `./node_modules/@opentiny/tiny-engine-theme-${extOptions.VITE_THEME}/dist/style.css`)
+    : ''
   }
 
   const config = {
+    envDir,
+    publicDir: path.resolve(__dirname, './public'),
     server: {
       port: 8090
     },
@@ -67,6 +80,6 @@ export default defineConfig((options) => {
       alias: devAlias
     }
   }
-
+  
   return mergeConfig(defaultConfig, config)
 })
