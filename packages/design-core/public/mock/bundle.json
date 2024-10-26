@@ -10544,7 +10544,7 @@
           "devMode": "proCode",
           "npm": {
             "package": "@opentiny/vue",
-            "exportName": "PopEditor",
+            "exportName": "Popeditor",
             "version": "",
             "destructuring": true
           },
