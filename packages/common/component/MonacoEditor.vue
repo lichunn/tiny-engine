@@ -6,7 +6,7 @@
         <div class="toolbar-start">
           <slot name="toolbarStart"></slot>
         </div>
-        <div :class="['buttons', { fullscreen: fullscreen }]">
+        <div :class="['buttons', { fullscreen: fullscreen }]" id="buttons">
           <slot name="buttons"></slot>
           <tiny-tooltip v-if="showFormatBtn && options.language === 'json'" content="格式化" placement="top">
             <public-icon name="json" @click="formatCode"></public-icon>
@@ -158,8 +158,10 @@ export default {
     gap: 8px;
     color: var(--ti-lowcode-component-svg-button-color);
     cursor: pointer;
-    :hover {
-      color: var(--ti-lowcode-component-svg-button-hover-color);
+  }
+  #buttons {
+    :deep(.svg-icon) {
+      color: var(--te-common-icon-secondary);
     }
   }
   .fullscreen {

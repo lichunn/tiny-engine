@@ -1,6 +1,6 @@
 <template>
   <div class="fullscreen-head-content">
-    <span>{{ title }}</span>
+    <span class="title">{{ title }}</span>
     <close-icon @close="close"></close-icon>
   </div>
 </template>
@@ -37,5 +37,10 @@ export default {
   width: 100%;
   display: flex;
   justify-content: space-between;
+  .title {
+    font-size: var(--te-base-font-size-base);
+    color: var(--te-common-text-primary);
+    font-weight: var(--te-base-font-weight-7);
+  }
 }
 </style>
