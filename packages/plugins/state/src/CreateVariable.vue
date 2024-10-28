@@ -441,6 +441,9 @@ export default {
   }
   :deep(.tiny-collapse-item__wrap) {
     padding: 0 12px;
+    .tiny-collapse-item__content {
+      padding: 0;
+    }
   }
 }
 

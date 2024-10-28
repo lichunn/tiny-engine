@@ -254,6 +254,9 @@ export default {
   overflow-y: auto;
   :deep(.tiny-collapse-item__wrap) {
     padding: 0 12px;
+    .tiny-collapse-item__content {
+      padding: 0;
+    }
   }
   :deep(.toolbar) {
     position: absolute;
