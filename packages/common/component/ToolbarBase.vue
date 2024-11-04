@@ -71,6 +71,10 @@ export default {
   margin: 0 4px;
   font-size: 14px;
 }
+.toolbar-item-wrap {
+  display: flex;
+  align-items: center;
+}
 .toolbar-item-wrap div {
   display: inline-block;
 }

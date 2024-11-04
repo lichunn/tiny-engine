@@ -239,6 +239,7 @@ export default {
       padding: 0 8px;
       height: 26px;
       line-height: 24px;
+      border: 0;
       border-radius: 4px;
     }
   }

@@ -4,8 +4,7 @@ export default {
   title: 'lang',
   options: {
     icon: {
-      zh_CN: 'cn',
-      en_US: 'en'
+      default: 'cn-en'
     },
     renderType: 'icon',
     collapsed: true

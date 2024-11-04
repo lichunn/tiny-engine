@@ -59,28 +59,33 @@ export default {
   }
 }
 
-.empty-bar {
-  font-size: 12px;
+.collapse-content {
+  margin: 8px 4px;
+  .empty-bar {
+    font-size: 12px;
 
-  .toolbar-list-button {
-    padding-top: 4px;
-    box-sizing: border-box;
+    .toolbar-list-button {
+      height: 24px;
+      line-height: 24px;
 
-    &:hover {
-      background-color: var(--ti-lowcode-toolbar-ellipsis-hover-bg);
-      cursor: pointer;
+      &:hover {
+        background-color: var(--ti-lowcode-toolbar-ellipsis-hover-bg);
+        cursor: pointer;
+      }
+    }
+
+    .empty-line {
+      margin: 4px 0px;
+      border-top: 1px solid var(--ti-lowcode-canvas-wrap-bg);
+    }
+
+    .icon-hides {
+      margin-right: 8px;
+      color: var(--te-common-icon-secondary);
     }
   }
-
-  .empty-line {
-    margin: 4px 0px;
-    border-top: 1px solid var(--ti-lowcode-canvas-wrap-bg);
-  }
-
-  .icon-hides {
-    margin-right: 8px;
-  }
 }
+
 .collapse-content .empty-bar:last-child {
   margin-bottom: 4px;
   .empty-line {

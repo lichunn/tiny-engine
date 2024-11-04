@@ -4,7 +4,7 @@ export default {
   title: 'collaboration',
   options: {
     icon: {
-      default: 'user'
+      default: 'team-collaboration'
     },
     renderType: 'slot',
     collapsed: true
