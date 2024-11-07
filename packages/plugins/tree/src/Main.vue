@@ -57,7 +57,7 @@
                   </span> -->
                   <span>{{ data.row.componentName }}</span>
                 </span>
-                <span v-show="!data.row.show" class="tree-handle" @mouseup="showNode(data.row)">
+                <span class="tree-handle" @mouseup="showNode(data.row)">
                   <icon-eyeopen v-show="data.row.show"></icon-eyeopen>
                   <icon-eyeclose v-show="!data.row.show"></icon-eyeclose>
                 </span>
@@ -105,6 +105,7 @@ export default {
       const translateChild = (data) => {
         data.forEach((item) => {
           item.show = pageState.nodesStatus[item.id] !== false
+          item.showEye = item.show === false
           const child = item.children
           if (typeOf(child) !== 'array') {
             delete item.children
@@ -312,16 +313,24 @@ export default {
     padding-top: 12px;
     border-top: 1px solid var(--ti-lowcode-tree-border-color);
 
-    .tree-handle svg {
-      color: var(--ti-lowcode-tree-icon-color);
+    .tree-handle {
+      display: none;
+      svg {
+        color: var(--ti-lowcode-tree-icon-color);
 
-      &:hover {
-        color: var(--ti-lowcode-tree-hover-icon-color);
+        &:hover {
+          color: var(--ti-lowcode-tree-hover-icon-color);
+        }
       }
     }
   }
   :deep(.tiny-grid) {
     background-color: unset;
+    .tree-box {
+      display: flex;
+      width: 200px;
+      justify-content: space-between;
+    }
 
     .tiny-grid-tree-wrapper {
       margin-right: 8px;
