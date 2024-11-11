@@ -20,7 +20,9 @@ const DEFAULT_PAGE = {
   page_content: {
     componentName: 'Page',
     css: '',
-    props: {},
+    props: {
+      style: 'padding: 24px;'
+    },
     lifeCycles: {},
     children: [],
     dataSource: {
