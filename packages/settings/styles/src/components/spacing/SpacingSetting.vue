@@ -45,7 +45,7 @@ export default {
   emits: useEvent(),
   setup(props, { emit }) {
     let sliderFlag = true
-    const options = [0, 10, 20, 40, 60, 100, 140, 220]
+    const options = [0, 4, 8, 12, 16, 20, 24, 32]
     const isReset = computed(() => Boolean(props.property.value))
     const isMargin = computed(
       () => props.property.type === SPACING_PROPERTY.Margin || props.property.type === POSITION_PROPERTY.Position
