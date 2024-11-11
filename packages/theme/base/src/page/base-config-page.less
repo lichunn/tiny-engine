@@ -251,9 +251,9 @@ td {
       }
     }
   }
-  &.fixed-left {
-    top: calc(24px + var(--base-nav-panel-width)) !important;
+  &.fixed-left.fixed-left {
+    top: var(--base-nav-panel-width) !important;
     transform: translateX(calc(4px - var(--base-right-panel-width)));
-    height: calc(100% - 36px);
+    height: calc(100% - 40px);
   }
 }
