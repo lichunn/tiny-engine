@@ -27,7 +27,9 @@ import {
   getCondition,
   getConditions,
   context,
-  setNode
+  setNode,
+  getDesignMode,
+  setDesignMode
 } from './context'
 import CanvasEmpty from './CanvasEmpty.vue'
 
@@ -451,5 +453,7 @@ export const api = {
   setGlobalState,
   setNode,
   getRenderer,
-  setRenderer
+  setRenderer,
+  getDesignMode,
+  setDesignMode
 }
