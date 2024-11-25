@@ -21,7 +21,7 @@ const DEFAULT_PAGE = {
     componentName: 'Page',
     css: '',
     props: {
-      style: 'padding: 24px;'
+      style: 'padding: 24px;background: #FFFFFF;'
     },
     lifeCycles: {},
     children: [],
