@@ -60,12 +60,20 @@ const generateNode = ({ type, component }) => {
   const snippet = getSnippet(component) || {}
   const schema = {
     componentName: component,
-    props: {},
-    ...snippet
+    ...snippet,
+    props: {
+      ...snippet.props,
+      style: 'margin: 8px;'
+    }
   }
 
   if (type === 'block') {
     schema.componentType = 'Block'
+    schema.props.style = 'margin: 16px;'
+  }
+
+  if (component === 'Text') {
+    schema.props.style = 'margin: 8px;display: inline-block;'
   }
 
   return schema
