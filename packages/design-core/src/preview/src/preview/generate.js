@@ -135,8 +135,11 @@ const generateUtils = (list) => {
 }
 
 const compatibleI18n = (i18n) => {
-  i18n.en_US = i18n.en_US ? i18n.en_US : {}
-  i18n.zh_CN = i18n.zh_CN ? i18n.zh_CN : {}
+  if (!i18n || typeof i18n !== 'object') {
+    return { en_US: {}, zh_CN: {} }
+  }
+  i18n.en_US = i18n.en_US && typeof i18n.en_US === 'object' ? i18n.en_US : {}
+  i18n.zh_CN = i18n.zh_CN && typeof i18n.zh_CN === 'object' ? i18n.zh_CN : {}
 
   return i18n
 }
