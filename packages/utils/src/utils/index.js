@@ -381,3 +381,58 @@ export const string2Obj = (string) => {
 
   return obj
 }
+
+/**
+ * 指定-转化为驼峰命名
+ * @param {*} string
+ * @returns
+ */
+
+export const toCamelCase = (str) => {
+  return str.replace(/[-\s]+(.)?/g, (match, group1) => (group1 ? group1.toUpperCase() : ''))
+}
+
+/**
+ * 驼峰转化为连字符形式
+ * @param {*} string
+ * @returns
+ */
+
+export const convertCamelToKebab = (string) => {
+  return string.replace(/([A-Z])/g, '-$1').toLowerCase()
+}
+
+/**
+ * 样式字符串转对象
+ * @param {*} string
+ * @returns
+ */
+
+export const styleString2Obj = (styleString) => {
+  const styles = styleString.trim().split(';')
+
+  const styleObject = styles.reduce((obj, pair) => {
+    const [key, value] = pair.split(':')
+    if (key && value) {
+      obj[toCamelCase(key.trim())] = value.trim()
+    }
+    return obj
+  }, {})
+  return styleObject
+}
+
+/**
+ * 对象转样式字符串
+ * @param {*} string
+ * @returns
+ */
+
+export const obj2StyleString = (obj) => {
+  let str = ''
+
+  for (let key in obj) {
+    str += `${convertCamelToKebab(key)}: ${obj[key]}; `
+  }
+  str = str.slice(0, -2)
+  return str
+}
