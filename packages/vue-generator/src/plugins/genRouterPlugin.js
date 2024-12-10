@@ -55,7 +55,7 @@ const convertToNestedRoutes = (schema) => {
         // 如果路径是最后一步，则设置组件和属性
         if (index === parts.length - 1) {
           // if(path === '/')
-          newNode.component = `() => import('@/views${item.path ? `/${item.path}` : ''}/${item.fileName}.vue'`
+          newNode.component = `() => import('@/views${item.path ? `/${item.path}` : ''}/${item.fileName}.vue')`
         }
 
         curretnLevel.push(newNode)
@@ -84,6 +84,8 @@ function genRouterPlugin(options = {}) {
      */
     run(schema) {
       const routesList = convertToNestedRoutes(schema)
+      // console.log('routesList',routesList);
+      // console.log('parseSchema',parseSchema(schema));
 
       // TODO: 支持 hash 模式、history 模式
       const importSnippet = "import { createRouter, createWebHashHistory } from 'vue-router'"

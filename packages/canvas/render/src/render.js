@@ -28,7 +28,8 @@ import {
   CanvasText,
   CanvasSlot,
   CanvasImg,
-  CanvasPlaceholder
+  CanvasPlaceholder,
+  CanvasRouterView
 } from './builtin'
 
 const { BROADCAST_CHANNEL } = constants
@@ -69,7 +70,8 @@ const Mapper = {
   CanvasRow,
   CanvasCol,
   CanvasRowColContainer,
-  CanvasPlaceholder
+  CanvasPlaceholder,
+  CanvasRouterView
 }
 
 const { post } = useBroadcastChannel({ name: BROADCAST_CHANNEL.Notify })

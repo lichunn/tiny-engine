@@ -5,6 +5,63 @@
         {
           "icon": "Box",
           "name": {
+            "zh_CN": "RouterView"
+          },
+          "component": "RouterView",
+          "schema": {
+            "slots": {},
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础信息"
+                },
+                "description": {
+                  "zh_CN": "基础信息"
+                },
+                "collapse": {
+                  "number": 6,
+                  "text": {
+                    "zh_CN": "显示更多"
+                  }
+                },
+                "content": []
+              }
+            ],
+            "events": {
+              "onClick": {
+                "label": {
+                  "zh_CN": "点击事件"
+                },
+                "description": {
+                  "zh_CN": "点击时触发的回调函数"
+                },
+                "type": "event",
+                "functionInfo": {
+                  "params": [],
+                  "returns": {}
+                },
+                "defaultValue": ""
+              }
+            },
+            "shortcuts": {
+              "properties": []
+            },
+            "contentMenu": {
+              "actions": []
+            }
+          },
+          "configure": {
+            "loop": true,
+            "isContainer": true,
+            "nestingRule": {
+              "childWhitelist": [],
+              "descendantBlacklist": []
+            }
+          }
+        },
+        {
+          "icon": "Box",
+          "name": {
             "zh_CN": "Box"
           },
           "component": "div",
@@ -458,6 +515,17 @@
             "zh_CN": "基础元素"
           },
           "children": [
+            {
+              "name": {
+                "zh_CN": "RouterView"
+              },
+              "icon": "Box",
+              "screenshot": "",
+              "snippetName": "RouterView",
+              "schema": {
+                "componentName": "RouterView"
+              }
+            },
             {
               "name": {
                 "zh_CN": "文本"
