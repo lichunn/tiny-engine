@@ -172,15 +172,6 @@ export default {
         children: children
           .filter((page) => page.id !== pageSettingState.currentPageData.id)
           .map((page) => pageToTreeData(page))
-          .map((page, index, arr) => {
-            if (index === 0) {
-              page.isFirst = true
-            }
-            if (index === arr.length - 1) {
-              page.isLast = true
-            }
-            return page
-          })
       }
     }
 
