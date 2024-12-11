@@ -28,6 +28,33 @@
           :icon="nullIcon"
           node-key="id"
         ></tiny-tree>
+        <draggble-tree
+          :data="groupItem.data"
+          label-key="name"
+          :active="state.currentNodeData.id"
+          @click-row="handleClickRow"
+        >
+          <template #row-suffix="{ node }">
+            <div :class="['actions']">
+              <svg-icon name="setting" @click="handleClickPageSettings(node)"></svg-icon>
+              <tiny-popover placement="bottom-start" :visible-arrow="false" popper-class="page-tree-row-operation-list">
+                <div class="operation-list">
+                  <div
+                    v-for="(operation, index) in rowOperations"
+                    :key="index"
+                    :class="[operation.type === 'divider' ? 'divider' : 'item'].concat(operation.class || [])"
+                    @click="operation.action?.(node)"
+                  >
+                    {{ operation.label }}
+                  </div>
+                </div>
+                <template #reference>
+                  <svg-icon name="ellipsis"></svg-icon>
+                </template>
+              </tiny-popover>
+            </div>
+          </template>
+        </draggble-tree>
       </div>
     </tiny-collapse-item>
   </tiny-collapse>
@@ -35,7 +62,7 @@
 
 <script lang="jsx">
 import { reactive, ref, nextTick, onUnmounted } from 'vue'
-import { Search, Tree, Collapse, CollapseItem } from '@opentiny/vue'
+import { Search, Tree, Collapse, CollapseItem, Popover } from '@opentiny/vue'
 import { IconFolderOpened, IconFolderClosed, IconSearch } from '@opentiny/vue-icon'
 import {
   useCanvas,
@@ -53,6 +80,7 @@ import { constants } from '@opentiny/tiny-engine-utils'
 import { closePageSettingPanel } from './PageSetting.vue'
 import { closeFolderSettingPanel } from './PageFolderSetting.vue'
 import http from './http.js'
+import DraggbleTree from './Tree.vue'
 
 const { ELEMENT_TAG, PAGE_STATUS, COMPONENT_NAME } = constants
 
@@ -62,7 +90,9 @@ export default {
     TinyTree: Tree,
     TinyCollapse: Collapse,
     TinyCollapseItem: CollapseItem,
-    TinyIconSearch: IconSearch()
+    TinyIconSearch: IconSearch(),
+    TinyPopover: Popover,
+    DraggbleTree
   },
   props: {
     isFolder: {
@@ -70,7 +100,7 @@ export default {
       default: false
     }
   },
-  emits: ['openSettingPanel', 'add'],
+  emits: ['openSettingPanel', 'add', 'createPage', 'createFolder'],
   setup(props, { emit }) {
     const { confirm } = useModal()
     const { initData, pageState, isBlock, isSaved } = useCanvas()
@@ -215,10 +245,10 @@ export default {
       getPageDetail(data.id)
     }
 
-    const nodeClick = (e, node) => {
-      e.stopPropagation()
+    const nodeClick = (e, pageData) => {
+      e?.stopPropagation()
 
-      const { id, isPage } = node.data
+      const { id, isPage } = pageData
 
       // 区块切换回页面需要重新加载页面
       if ((!isBlock() && id === state?.currentNodeData?.id) || !isPage) {
@@ -226,7 +256,7 @@ export default {
       }
 
       if (isSaved() && isCurrentDataSame()) {
-        switchPage(node.data)
+        switchPage(pageData)
       } else {
         confirm({
           title: '提示',
@@ -234,17 +264,17 @@ export default {
           exec: () => {
             changeTreeData(pageSettingState.oldParentId, pageSettingState.currentPageData.parentId)
             Object.assign(pageSettingState.currentPageData, pageSettingState.currentPageDataCopy)
-            switchPage(node.data)
+            switchPage(pageData)
           }
         })
       }
     }
 
-    const openSettingPanel = (e, node, isPageLocked) => {
-      e.stopPropagation()
+    const openSettingPanel = (e, pageData, isPageLocked) => {
+      e?.stopPropagation()
 
-      if (isPageLocked && node.data.isPage) {
-        const username = node.data.occupier?.username || ''
+      if (isPageLocked && pageData.isPage) {
+        const username = pageData.occupier?.username || ''
 
         useModal().message({
           message: `您点击的页面被${username}锁定，暂时无法编辑，请联系解锁`,
@@ -255,7 +285,7 @@ export default {
       }
 
       if (isEqual(pageSettingState.currentPageData, pageSettingState.currentPageDataCopy)) {
-        emit('openSettingPanel', node)
+        emit('openSettingPanel', pageData)
       } else {
         confirm({
           title: '提示',
@@ -263,7 +293,7 @@ export default {
           exec: () => {
             changeTreeData(pageSettingState.oldParentId, pageSettingState.currentPageData.parentId)
             Object.assign(pageSettingState.currentPageData, pageSettingState.currentPageDataCopy)
-            emit('openSettingPanel', node)
+            emit('openSettingPanel', pageData)
           }
         })
       }
@@ -273,7 +303,7 @@ export default {
       const isPageLocked = getCanvasStatus(data.occupier).state === PAGE_STATUS.Lock
 
       return (
-        <span class="tiny-tree-node__label" onMousedown={(e) => nodeClick(e, node)}>
+        <span class="tiny-tree-node__label" onMousedown={(e) => nodeClick(e, data)}>
           {data.isPage ? (
             <SvgIcon name="text-page-common" class="icon-page"></SvgIcon>
           ) : (
@@ -285,19 +315,53 @@ export default {
               <SvgIcon
                 class="page-edit-icon"
                 name="locked"
-                onMousedown={(e) => openSettingPanel(e, node, isPageLocked)}
+                onMousedown={(e) => openSettingPanel(e, data, isPageLocked)}
               ></SvgIcon>
             ) : null}
             {data.isHome ? <SvgIcon class="page-edit-icon" name="text-page-home"></SvgIcon> : null}
             <SvgIcon
               name="setting"
               class="setting page-edit-icon"
-              onMousedown={(e) => openSettingPanel(e, node, isPageLocked)}
+              onMousedown={(e) => openSettingPanel(e, data, isPageLocked)}
             ></SvgIcon>
           </span>
         </span>
       )
     }
+
+    const handleClickRow = (node) => {
+      nodeClick(null, node.rawData)
+    }
+
+    const handleClickPageSettings = (node) => {
+      const isPageLocked = getCanvasStatus(node.rawData.occupier).state === PAGE_STATUS.Lock
+      openSettingPanel(null, node.rawData, isPageLocked)
+    }
+
+    const createPage = (node) => {
+      emit('createPage', 'staticPages', node.id)
+    }
+
+    const createFolder = (node) => {
+      emit('createFolder', node.id)
+    }
+
+    const copyPage = () => {
+      // TODO
+    }
+
+    const deleteNode = () => {
+      // TODO
+    }
+
+    const rowOperations = [
+      { type: 'createPage', label: '新建子页面', action: createPage },
+      { type: 'createFolder', label: '新建子文件夹', action: createFolder },
+      { type: 'divider' },
+      { type: 'copy', label: '复制页面', action: copyPage },
+      { type: 'divider' },
+      { type: 'delete', label: '删除', class: ['danger'], action: deleteNode }
+    ]
 
     useMessage().subscribe({
       topic: 'app_id_changed',
@@ -346,7 +410,10 @@ export default {
       getPageTreeRefs,
       IconFolderOpened: IconFolderOpened(),
       IconFolderClosed: IconFolderClosed(),
-      nullIcon
+      nullIcon,
+      rowOperations,
+      handleClickRow,
+      handleClickPageSettings
     }
   }
 }
@@ -439,6 +506,60 @@ export default {
           background-color: var(--te-common-bg-container);
         }
       }
+    }
+  }
+  .actions {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    svg {
+      color: var(--te-common-icon-secondary);
+      outline: none;
+    }
+    &.show {
+      display: flex;
+    }
+  }
+  .row:hover .actions {
+    display: flex;
+  }
+}
+</style>
+
+<style lang="less">
+.tiny-popover.tiny-popper[x-placement].page-tree-row-operation-list {
+  padding: 0;
+  margin-top: 4px;
+  .operation-list {
+    padding: 8px 0;
+    & > div {
+      padding: 0 12px;
+    }
+    .item {
+      height: 24px;
+      font-size: 12px;
+      line-height: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      &:hover {
+        background-color: var(--te-common-bg-container);
+      }
+    }
+    .divider {
+      height: 8px;
+      display: flex;
+      align-items: center;
+      &::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 1px;
+        background-color: var(--te-common-border-divider);
+      }
+    }
+    .danger {
+      color: var(--te-common-color-error);
     }
   }
 }
