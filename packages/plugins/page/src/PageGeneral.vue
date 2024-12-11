@@ -206,10 +206,8 @@ export default {
         shrinkIcon: null,
         expandIcon: null,
         renderContent: (_h, { node, data }) => {
-          // TODO 1px #EBEBEB
           return (
             <>
-              <span style="width: 12px"></span>
               {getNodeIcon(data)}
               <label>{node.label}</label>
             </>
@@ -313,11 +311,12 @@ export default {
         &:hover {
           background-color: var(--te-common-bg-container);
         }
-        // 移除所有子节点以及子节点hover状态的背景
-        * {
-          background: unset !important;
+        // 移除子节点的的背景色，才能保证鼠标hover到.tiny-tree-node__content节点任意位置时，整行都有hover状态的背景色
+        .tiny-tree-node__content-left,
+        .tiny-tree-node__content-left .tiny-tree-node__content-box {
+          background-color: unset;
           &:hover {
-            background: unset !important;
+            background-color: unset;
           }
         }
         .tiny-tree-node__content-left {
@@ -326,8 +325,7 @@ export default {
             margin: 0;
           }
           .tiny-tree-node__content-box {
-            padding: 0;
-            padding-right: 12px;
+            padding: 0 12px;
             svg {
               margin-right: 8px;
             }
