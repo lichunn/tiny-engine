@@ -28,7 +28,8 @@ import {
   CanvasText,
   CanvasSlot,
   CanvasImg,
-  CanvasPlaceholder
+  CanvasPlaceholder,
+  CanvasFlexBox
 } from './builtin'
 
 const { BROADCAST_CHANNEL } = constants
@@ -66,6 +67,7 @@ const Mapper = {
   slot: CanvasSlot,
   Template: CanvasBox,
   Img: CanvasImg,
+  flexBox: CanvasFlexBox,
   CanvasRow,
   CanvasCol,
   CanvasRowColContainer,
