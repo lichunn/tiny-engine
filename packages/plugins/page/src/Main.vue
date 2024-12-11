@@ -69,7 +69,7 @@ export default {
   },
   setup() {
     const { pageState } = useCanvas()
-    const { pageSettingState, DEFAULT_PAGE, isTemporaryPage, initCurrentPageData } = usePage()
+    const { pageSettingState, getDefaultPage, isTemporaryPage, initCurrentPageData } = usePage()
 
     const pageTreeRef = ref(null)
     const ROOT_ID = pageSettingState.ROOT_ID
@@ -83,7 +83,7 @@ export default {
       closeFolderSettingPanel()
       pageSettingState.isNew = true
       pageSettingState.currentPageData = {
-        ...DEFAULT_PAGE,
+        ...getDefaultPage(),
         parentId: ROOT_ID,
         route: '',
         name: 'Untitled',

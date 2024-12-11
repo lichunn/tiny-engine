@@ -12,6 +12,7 @@
 
 import { reactive, ref } from 'vue'
 import { extend, isEqual } from '@opentiny/vue-renderless/common/object'
+import { getOptions } from '@opentiny/tiny-engine-meta-register'
 
 const DEFAULT_PAGE = {
   app: '',
@@ -20,9 +21,7 @@ const DEFAULT_PAGE = {
   page_content: {
     componentName: 'Page',
     css: '',
-    props: {
-      style: 'padding: 24px;background: #FFFFFF;'
-    },
+    props: {},
     lifeCycles: {},
     children: [],
     dataSource: {
@@ -58,6 +57,21 @@ const pageSettingState = reactive({
 const isTemporaryPage = reactive({
   saved: false
 })
+
+const getDefaultPage = () => {
+  const materialsOptions = getOptions('engine.plugins.materials')
+  const pageOptions = getOptions('engine.plugins.appmanage')
+
+  DEFAULT_PAGE.page_content.props.className = pageOptions.pageBaseStyle.className
+  DEFAULT_PAGE.page_content.css =
+    `.${pageOptions.pageBaseStyle.className}{\r\n  ${pageOptions.pageBaseStyle.style}\r\n}\r\n` +
+    (materialsOptions.useBaseStyle
+      ? `.${materialsOptions.blockBaseStyle.className}{\r\n  ${materialsOptions.blockBaseStyle.style}\r\n}\r\n.${materialsOptions.componentBaseStyle.className}{\r\n  ${materialsOptions.componentBaseStyle.style}\r\n}\r\n`
+      : '')
+
+  return DEFAULT_PAGE
+}
+
 const isCurrentDataSame = () => {
   const data = pageSettingState.currentPageData || {}
   const dataCopy = pageSettingState.currentPageDataCopy || {}
@@ -136,7 +150,7 @@ const COMMON_PAGE_GROUP_ID = 1
 
 export default () => {
   return {
-    DEFAULT_PAGE,
+    getDefaultPage,
     selectedTemplateCard,
     pageSettingState,
     isTemporaryPage,

@@ -58,22 +58,19 @@ const getSnippet = (component) => {
 
 const generateNode = ({ type, component }) => {
   const snippet = getSnippet(component) || {}
+
   const schema = {
     componentName: component,
     ...snippet,
     props: {
       ...snippet.props,
-      style: 'margin: 8px;'
+      className: getOptions(meta.id).useBaseStyle ? getOptions(meta.id).componentBaseStyle.className : ''
     }
   }
 
   if (type === 'block') {
     schema.componentType = 'Block'
-    schema.props.style = 'margin: 16px;'
-  }
-
-  if (component === 'Text') {
-    schema.props.style = 'margin: 8px;display: inline-block;'
+    schema.props.className = getOptions(meta.id).useBaseStyle ? getOptions(meta.id).blockBaseStyle.className : ''
   }
 
   return schema
