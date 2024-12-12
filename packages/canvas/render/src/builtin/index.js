@@ -17,6 +17,5 @@ import CanvasIcon from './CanvasIcon.vue'
 import CanvasSlot from './CanvasSlot.vue'
 import CanvasImg from './CanvasImg.vue'
 import CanvasPlaceholder from './CanvasPlaceholder.vue'
-import CanvasFlexBox from './CanvasFlexBox.vue'
 
-export { CanvasText, CanvasBox, CanvasCollection, CanvasIcon, CanvasSlot, CanvasImg, CanvasPlaceholder, CanvasFlexBox }
+export { CanvasText, CanvasBox, CanvasCollection, CanvasIcon, CanvasSlot, CanvasImg, CanvasPlaceholder }

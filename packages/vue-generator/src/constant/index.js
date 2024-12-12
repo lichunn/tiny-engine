@@ -2195,6 +2195,13 @@ export const BUILTIN_COMPONENTS_MAP = [
     package: '@opentiny/tiny-engine-builtin-component',
     version: '^1.0.1',
     destructuring: true
+  },
+  {
+    componentName: 'CanvasFlexBox',
+    exportName: 'CanvasFlexBox',
+    package: '@opentiny/tiny-engine-builtin-component',
+    version: '^1.0.1',
+    destructuring: true
   }
 ]
 
