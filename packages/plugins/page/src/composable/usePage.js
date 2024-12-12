@@ -10,8 +10,13 @@
  *
  */
 
-import { computed, reactive, ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { extend, isEqual } from '@opentiny/vue-renderless/common/object'
+import { constants } from '@opentiny/tiny-engine-utils'
+import { getMetaApi, META_SERVICE } from '@opentiny/tiny-engine-meta-register'
+import http from '../http'
+
+const { ELEMENT_TAG } = constants
 
 const DEFAULT_PAGE = {
   app: '',
@@ -132,55 +137,111 @@ const isChangePageData = () => !isEqual(pageSettingState.currentPageData, pageSe
 const STATIC_PAGE_GROUP_ID = 0
 const COMMON_PAGE_GROUP_ID = 1
 
-// TODO 如果没有打开过 PageTree，是不会有数据的
-const pageMaps = computed(() => {
-  return pageSettingState.pages.map((pages) => {
-    const result = {}
+/**
+ *
+ * @typedef {Object} PageData
+ * @property {string | number} id
+ * @property {string | number} parentId
+ *
+ * @typedef {Object} PageNode
+ * @property {string | number} id
+ * @property {string | number} parentId
+ * @property {PageNode[] | undefined} children
+ *
+ * @param {PageData[]} data
+ * @returns
+ */
+const generateTree = (data) => {
+  const { ROOT_ID } = pageSettingState
 
-    const treeToMap = (node) => {
-      const { id, children } = node
-      result[id] = node
+  /** @type {Record<string, PageNode>} */
+  const treeDataMapping = { [ROOT_ID]: { id: ROOT_ID } }
 
-      if (Array.isArray(children)) {
-        children.forEach((child) => {
-          treeToMap(child)
-        })
-      }
+  data.forEach((item) => {
+    treeDataMapping[item.id] = item
+  })
 
-      return result
+  data.forEach((item) => {
+    const parentNode = treeDataMapping[item.parentId]
+
+    if (!parentNode) {
+      return
     }
 
-    treeToMap({ id: pageSettingState.ROOT_ID, children: pages.data })
-
-    return result
+    parentNode.children = parentNode.children || []
+    parentNode.children.push(item)
   })
-})
+
+  return treeDataMapping
+}
+
+const getPageList = async (appId) => {
+  const pagesData = await http.fetchPageList(appId)
+
+  const firstGroupData = { groupName: '静态页面', groupId: STATIC_PAGE_GROUP_ID, data: [] }
+  const secondGroupData = { groupName: '公共页面', groupId: COMMON_PAGE_GROUP_ID, data: [] }
+
+  pagesData.forEach((item) => {
+    const namedNode = item.name ? item : { ...item, name: item.folderName, group: 'staticPages' }
+    const node = item.meta
+      ? {
+          ...item,
+          ...item.meta,
+          name: item.fileName,
+          isPage: true,
+          isBody: item.meta.rootElement === ELEMENT_TAG.Body
+        }
+      : namedNode
+
+    const { children, ...other } = node
+
+    if (node.group === 'staticPages') {
+      firstGroupData.data.push(other)
+    } else {
+      secondGroupData.data.push(other)
+    }
+  })
+
+  const firstGroupTreeData = generateTree(firstGroupData.data)
+  pageSettingState.treeDataMapping = firstGroupTreeData
+  firstGroupData.data = firstGroupTreeData[pageSettingState.ROOT_ID].children
+  pageSettingState.pages = [firstGroupData, secondGroupData]
+  return pageSettingState.pages
+}
 
 /**
- * @param {string} id 节点id
- * @param {STATIC_PAGE_GROUP_ID | COMMON_PAGE_GROUP_ID} groupId 0表示静态页面，1表示功能页面
- * @returns {{node:any,parent:any;siblings:{previous:any,next:any}}} 返回id对应的节点，以及父节点和兄弟节点
+ * @param {string | number} id page Id
+ * @param {boolean} withFolders default `false`
+ * @returns {(string | number)[]}
  */
-const getPageNodeData = (id, groupId) => {
-  const pageMap = pageMaps.value[groupId]
-  const node = pageMap?.[id]
-
-  if (!node) {
-    return null
+const getAncestors = async (id, withFolders) => {
+  if (pageSettingState.pages.length === 0) {
+    const appId = getMetaApi(META_SERVICE.GlobalService).getBaseInfo().id
+    await getPageList(appId)
   }
 
-  const parent = pageMap[node.parentId]
-  const siblings = parent.children
-  const index = siblings.findIndex((item) => item.id === id)
+  /**
+   * @param {string | number} id
+   * @param {(string | number)[]} ancestors
+   * @returns {(string | number)[]}
+   */
+  const getAncestorsRecursively = (id) => {
+    const pageNode = pageSettingState.treeDataMapping[id]
 
-  return {
-    node,
-    parent,
-    siblings: {
-      previous: siblings.slice(0, index),
-      next: siblings.slice(index + 1)
+    if (pageNode.id === pageSettingState.ROOT_ID) {
+      return []
     }
+
+    return [pageNode].concat(getAncestorsRecursively(pageNode.parentId))
   }
+
+  const ancestorsWithSelf = getAncestorsRecursively(id)
+  const ancestors = ancestorsWithSelf.slice(1).reverse()
+
+  if (withFolders) {
+    return ancestors.map((item) => item.id)
+  }
+  return ancestors.filter((item) => item.isPage).map((item) => item.id)
 }
 
 export default () => {
@@ -195,7 +256,8 @@ export default () => {
     resetPageData,
     initCurrentPageData,
     isChangePageData,
-    getPageNodeData,
+    getPageList,
+    getAncestors,
     STATIC_PAGE_GROUP_ID,
     COMMON_PAGE_GROUP_ID
   }

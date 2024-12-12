@@ -13,21 +13,7 @@
         <span class="title">{{ groupItem.groupName }}</span>
       </template>
       <div class="app-manage-tree">
-        <tiny-tree
-          :ref="getPageTreeRefs"
-          :key="pageSettingState.pageTreeKey"
-          :data="groupItem.data"
-          :props="{
-            children: 'children',
-            label: 'name'
-          }"
-          default-expand-all
-          :filter-node-method="filterPageTreeData"
-          :render-content="renderContent"
-          :expand-on-click-node="false"
-          :icon="nullIcon"
-          node-key="id"
-        ></tiny-tree>
+        <!-- TODO 1. filters; 2. lock, home icons; 3. pageTreeKey是否需要？ -->
         <draggble-tree
           :data="groupItem.data"
           label-key="name"
@@ -36,11 +22,15 @@
         >
           <template #row-suffix="{ node }">
             <div :class="['actions']">
-              <svg-icon name="setting" @click="handleClickPageSettings(node)"></svg-icon>
-              <tiny-popover placement="bottom-start" :visible-arrow="false" popper-class="page-tree-row-operation-list">
+              <tiny-popover
+                :ref="(el) => setPopoverRef(el, node.id)"
+                placement="bottom-start"
+                :visible-arrow="false"
+                popper-class="page-tree-row-operation-list"
+              >
                 <div class="operation-list">
                   <div
-                    v-for="(operation, index) in rowOperations"
+                    v-for="(operation, index) in getRowOperations(groupItem.groupId, node)"
                     :key="index"
                     :class="[operation.type === 'divider' ? 'divider' : 'item'].concat(operation.class || [])"
                     @click="operation.action?.(node)"
@@ -61,8 +51,8 @@
 </template>
 
 <script lang="jsx">
-import { reactive, ref, nextTick, onUnmounted } from 'vue'
-import { Search, Tree, Collapse, CollapseItem, Popover } from '@opentiny/vue'
+import { reactive, onUnmounted } from 'vue'
+import { Search, Collapse, CollapseItem, Popover } from '@opentiny/vue'
 import { IconFolderOpened, IconFolderClosed, IconSearch } from '@opentiny/vue-icon'
 import {
   useCanvas,
@@ -82,12 +72,11 @@ import { closeFolderSettingPanel } from './PageFolderSetting.vue'
 import http from './http.js'
 import DraggbleTree from './Tree.vue'
 
-const { ELEMENT_TAG, PAGE_STATUS, COMPONENT_NAME } = constants
+const { PAGE_STATUS, COMPONENT_NAME } = constants
 
 export default {
   components: {
     TinySearch: Search,
-    TinyTree: Tree,
     TinyCollapse: Collapse,
     TinyCollapseItem: CollapseItem,
     TinyIconSearch: IconSearch(),
@@ -104,12 +93,16 @@ export default {
   setup(props, { emit }) {
     const { confirm } = useModal()
     const { initData, pageState, isBlock, isSaved } = useCanvas()
-    const { pageSettingState, changeTreeData, isCurrentDataSame, STATIC_PAGE_GROUP_ID, COMMON_PAGE_GROUP_ID } =
-      usePage()
-    const { fetchPageList, fetchPageDetail } = http
+    const {
+      pageSettingState,
+      changeTreeData,
+      isCurrentDataSame,
+      getPageList,
+      STATIC_PAGE_GROUP_ID,
+      COMMON_PAGE_GROUP_ID
+    } = usePage()
+    const { fetchPageDetail } = http
     const { setBreadcrumbPage } = useBreadcrumb()
-    const pageTreeRefs = ref([])
-    const ROOT_ID = pageSettingState.ROOT_ID
     const getAppId = () => getMetaApi(META_SERVICE.GlobalService).getBaseInfo().id
 
     const state = reactive({
@@ -117,74 +110,16 @@ export default {
       collapseValue: [STATIC_PAGE_GROUP_ID, COMMON_PAGE_GROUP_ID],
       currentNodeData: {}
     })
-    const formatTreeData = (data, parentId, id) => {
-      const originObj = { [ROOT_ID]: { id: ROOT_ID, name: '站点根目录', children: [] } }
-      const treeArr = []
 
-      data.forEach((item) => {
-        originObj[item[id]] = item
-        if (item.parentId === ROOT_ID) {
-          originObj[ROOT_ID].children.push(item)
-        }
-      })
-
-      data.forEach((item) => {
-        let parentObj = originObj[item[parentId]]
-        if (parentObj && parentObj.id !== ROOT_ID) {
-          parentObj.children = parentObj.children || []
-          parentObj.children.push(item)
-        } else if (parentObj && parentObj.id === ROOT_ID) {
-          treeArr.push(item)
-        }
-      })
-
-      pageSettingState.treeDataMapping = originObj
-
-      return pageSettingState.treeDataMapping
+    const searchPageData = (_value) => {
+      // TODO
     }
 
-    const searchPageData = (value) => {
-      if (Array.isArray(pageTreeRefs?.value)) {
-        nextTick(() => {
-          pageTreeRefs.value.forEach((item) => {
-            item?.filter(value)
-          })
-        })
-      }
-    }
-
-    const refreshPageList = async (appId, data) => {
-      const pagesData = data ? data : await fetchPageList(appId)
-
-      const firstGroupData = { groupName: '静态页面', groupId: STATIC_PAGE_GROUP_ID, data: [] }
-      const secondGroupData = { groupName: '公共页面', groupId: COMMON_PAGE_GROUP_ID, data: [] }
-
-      pagesData.forEach((item) => {
-        const namedNode = item.name ? item : { ...item, name: item.folderName, group: 'staticPages' }
-        const node = item.meta
-          ? {
-              ...item,
-              ...item.meta,
-              name: item.fileName,
-              isPage: true,
-              isBody: item.meta.rootElement === ELEMENT_TAG.Body
-            }
-          : namedNode
-
-        const { children, ...other } = node
-
-        if (node.group === 'staticPages') {
-          firstGroupData.data.push(other)
-        } else {
-          secondGroupData.data.push(other)
-        }
-      })
-
-      const firstGroupTreeData = formatTreeData([...firstGroupData.data], 'parentId', 'id')
-      firstGroupData.data = firstGroupTreeData[ROOT_ID].children
-      pageSettingState.pages = [firstGroupData, secondGroupData]
+    const refreshPageList = async (appId) => {
+      const pages = await getPageList(appId)
       searchPageData(state.pageSearchValue)
-      return pageSettingState.pages
+
+      return pages
     }
 
     pageSettingState.updateTreeData = async () => {
@@ -299,34 +234,9 @@ export default {
       }
     }
 
-    const renderContent = (h, { node, data }) => {
-      const isPageLocked = getCanvasStatus(data.occupier).state === PAGE_STATUS.Lock
-
-      return (
-        <span class="tiny-tree-node__label" onMousedown={(e) => nodeClick(e, data)}>
-          {data.isPage ? (
-            <SvgIcon name="text-page-common" class="icon-page"></SvgIcon>
-          ) : (
-            <SvgIcon name="text-page-folder-closed" class="folder-icon"></SvgIcon>
-          )}
-          <span class="label">{node.label}</span>
-          <span class="icons">
-            {data.isPage && isPageLocked ? (
-              <SvgIcon
-                class="page-edit-icon"
-                name="locked"
-                onMousedown={(e) => openSettingPanel(e, data, isPageLocked)}
-              ></SvgIcon>
-            ) : null}
-            {data.isHome ? <SvgIcon class="page-edit-icon" name="text-page-home"></SvgIcon> : null}
-            <SvgIcon
-              name="setting"
-              class="setting page-edit-icon"
-              onMousedown={(e) => openSettingPanel(e, data, isPageLocked)}
-            ></SvgIcon>
-          </span>
-        </span>
-      )
+    const popoverRefs = {}
+    const setPopoverRef = (el, nodeId) => {
+      popoverRefs[nodeId] = el
     }
 
     const handleClickRow = (node) => {
@@ -355,13 +265,31 @@ export default {
     }
 
     const rowOperations = [
+      { type: 'settings', label: '设置', action: handleClickPageSettings },
+      { type: 'divider' },
       { type: 'createPage', label: '新建子页面', action: createPage },
       { type: 'createFolder', label: '新建子文件夹', action: createFolder },
       { type: 'divider' },
       { type: 'copy', label: '复制页面', action: copyPage },
-      { type: 'divider' },
       { type: 'delete', label: '删除', class: ['danger'], action: deleteNode }
-    ]
+    ].map((item) => ({
+      ...item,
+      action: (node) => {
+        item.action?.(node)
+        // 点击 action 后，关闭 popover 弹窗
+        popoverRefs[node.id]?.doClose?.()
+      }
+    }))
+
+    const getRowOperations = (groupId, node) => {
+      if (groupId === COMMON_PAGE_GROUP_ID) {
+        return rowOperations.slice(0, 2).concat(rowOperations.slice(5))
+      }
+      if (!node.rawData.isPage) {
+        return rowOperations.filter((item) => item.type !== 'copy')
+      }
+      return rowOperations
+    }
 
     useMessage().subscribe({
       topic: 'app_id_changed',
@@ -371,25 +299,11 @@ export default {
       }
     })
 
-    const filterPageTreeData = (value, data) => {
-      if (!value) return true
-
-      return data.name?.toLowerCase().indexOf(value?.toLowerCase()) !== -1
-    }
-
-    const getPageTreeRefs = (el) => {
-      if (el) {
-        pageTreeRefs.value.push(el)
-      }
-    }
-
     const createPublicPage = (e) => {
       e.stopPropagation()
       e.preventDefault()
       emit('add')
     }
-
-    const nullIcon = <span></span>
 
     onUnmounted(() => {
       useMessage().unsubscribe({
@@ -404,14 +318,10 @@ export default {
       switchPage,
       pageSettingState,
       searchPageData,
-      renderContent,
-      refreshPageList,
-      filterPageTreeData,
-      getPageTreeRefs,
+      setPopoverRef,
       IconFolderOpened: IconFolderOpened(),
       IconFolderClosed: IconFolderClosed(),
-      nullIcon,
-      rowOperations,
+      getRowOperations,
       handleClickRow,
       handleClickPageSettings
     }
