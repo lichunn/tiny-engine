@@ -25,6 +25,38 @@ const defaultOption = {
 
 //   return routes
 // }
+const transformRoutes = (routes) => {
+  const result = []
+  const processRoutes = (currentRoutes, basePath = '') => {
+    currentRoutes.forEach((route) => {
+      const fullPath = basePath
+        ? `${basePath}${route.path.startsWith('/') ? route.path : '/' + route.path}`
+        : route.path
+
+      if (route.component) {
+        // 如果路由有component，直接添加到结果数组中
+        result.push({
+          path: fullPath,
+          component: route.component,
+          ...(route.children
+            ? {
+                children: route.children.map((child) => ({
+                  ...child,
+                  path: child.path.startsWith('/') ? child.path : `/${child.path}`
+                }))
+              }
+            : {})
+        })
+      } else if (route.children && route.children.length > 0) {
+        // 如果路由没有component但有children
+        processRoutes(route.children, fullPath)
+      }
+    })
+  }
+  processRoutes(routes)
+
+  return result
+}
 
 const convertToNestedRoutes = (schema) => {
   const { pageSchema } = schema
@@ -49,7 +81,6 @@ const convertToNestedRoutes = (schema) => {
         // 如果不存在该路径部分，创建一个新节点
         const newNode = {
           path: part,
-          component: undefined,
           children: []
         }
         // 如果路径是最后一步，则设置组件和属性
@@ -64,7 +95,7 @@ const convertToNestedRoutes = (schema) => {
     })
   })
 
-  return result
+  return transformRoutes(result)
 }
 
 // 示例路由数组
