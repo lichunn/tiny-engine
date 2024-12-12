@@ -10,7 +10,7 @@
  *
  */
 
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { extend, isEqual } from '@opentiny/vue-renderless/common/object'
 
 const DEFAULT_PAGE = {
@@ -132,6 +132,57 @@ const isChangePageData = () => !isEqual(pageSettingState.currentPageData, pageSe
 const STATIC_PAGE_GROUP_ID = 0
 const COMMON_PAGE_GROUP_ID = 1
 
+// TODO 如果没有打开过 PageTree，是不会有数据的
+const pageMaps = computed(() => {
+  return pageSettingState.pages.map((pages) => {
+    const result = {}
+
+    const treeToMap = (node) => {
+      const { id, children } = node
+      result[id] = node
+
+      if (Array.isArray(children)) {
+        children.forEach((child) => {
+          treeToMap(child)
+        })
+      }
+
+      return result
+    }
+
+    treeToMap({ id: pageSettingState.ROOT_ID, children: pages.data })
+
+    return result
+  })
+})
+
+/**
+ * @param {string} id 节点id
+ * @param {STATIC_PAGE_GROUP_ID | COMMON_PAGE_GROUP_ID} groupId 0表示静态页面，1表示功能页面
+ * @returns {{node:any,parent:any;siblings:{previous:any,next:any}}} 返回id对应的节点，以及父节点和兄弟节点
+ */
+const getPageNodeData = (id, groupId) => {
+  const pageMap = pageMaps.value[groupId]
+  const node = pageMap?.[id]
+
+  if (!node) {
+    return null
+  }
+
+  const parent = pageMap[node.parentId]
+  const siblings = parent.children
+  const index = siblings.findIndex((item) => item.id === id)
+
+  return {
+    node,
+    parent,
+    siblings: {
+      previous: siblings.slice(0, index),
+      next: siblings.slice(index + 1)
+    }
+  }
+}
+
 export default () => {
   return {
     DEFAULT_PAGE,
@@ -144,6 +195,7 @@ export default () => {
     resetPageData,
     initCurrentPageData,
     isChangePageData,
+    getPageNodeData,
     STATIC_PAGE_GROUP_ID,
     COMMON_PAGE_GROUP_ID
   }

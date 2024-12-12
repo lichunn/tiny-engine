@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import { computed, defineProps, defineEmits, watchEffect } from 'vue'
+import { computed, defineProps, defineEmits } from 'vue'
 
 // TODO filter 功能
 const props = defineProps({
@@ -69,11 +69,6 @@ const flattenTreeData = (node, parentId, level = 0) => {
 
 const list = computed(() => {
   return flattenTreeData({ id: ROOT_ID, children: props.data }).slice(1)
-})
-
-watchEffect(() => {
-  // eslint-disable-next-line no-console
-  console.log(list.value)
 })
 
 const handleClickRow = (node) => {
