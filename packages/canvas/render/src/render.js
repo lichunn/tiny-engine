@@ -17,7 +17,13 @@ import { constants, utils } from '@opentiny/tiny-engine-utils'
 import babelPluginJSX from '@vue/babel-plugin-jsx'
 import { transformSync } from '@babel/core'
 import i18nHost from '@opentiny/tiny-engine-i18n-host'
-import { CanvasRow, CanvasCol, CanvasRowColContainer, CanvasFlexBox } from '@opentiny/tiny-engine-builtin-component'
+import {
+  CanvasRow,
+  CanvasCol,
+  CanvasRowColContainer,
+  CanvasFlexBox,
+  CanvasSection
+} from '@opentiny/tiny-engine-builtin-component'
 
 import { NODE_UID as DESIGN_UIDKEY, NODE_TAG as DESIGN_TAGKEY, NODE_LOOP as DESIGN_LOOPID } from '../../common'
 import { context, conditions, setNode, getDesignMode, DESIGN_MODE } from './context'
@@ -66,6 +72,7 @@ const Mapper = {
   slot: CanvasSlot,
   Template: CanvasBox,
   Img: CanvasImg,
+  CanvasSection,
   CanvasFlexBox,
   CanvasRow,
   CanvasCol,

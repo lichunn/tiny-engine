@@ -13,7 +13,7 @@
 /* eslint-disable no-new-func */
 import { reactive, ref } from 'vue'
 import { constants } from '@opentiny/tiny-engine-utils'
-import { useHistory } from '@opentiny/tiny-engine-meta-register'
+import { useHistory, getMetaApi } from '@opentiny/tiny-engine-meta-register'
 
 const { COMPONENT_NAME } = constants
 
@@ -80,11 +80,17 @@ const resetBlockCanvasState = async (state = {}) => {
   await resetCanvasState(state)
 }
 
-const getDefaultSchema = (componentName = 'Page', fileName = '') => ({
-  ...defaultSchema,
-  componentName,
-  fileName
-})
+const getDefaultSchema = (componentName = 'Page', fileName = '') => {
+  const DEFAULT_PAGE = getMetaApi('engine.service.page').getDefaultPage()
+
+  return {
+    ...defaultSchema,
+    props: DEFAULT_PAGE.page_content.props,
+    css: DEFAULT_PAGE.page_content.css,
+    componentName,
+    fileName
+  }
+}
 
 const setSaved = (flag = false) => {
   pageState.isSaved = flag

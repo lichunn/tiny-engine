@@ -4,7 +4,7 @@
     "name": {
       "zh_CN": "弹性盒子容器"
     },
-    "component": "FlexBox",
+    "component": "CanvasFlexBox",
     "schema": {
       "slots": {},
       "properties": [
@@ -86,6 +86,86 @@
                 "component": "InputConfigurator"
               },
               "labelPosition": "left"
+            },
+            {
+              "property": "justifyContent",
+              "type": "String",
+              "defaultValue": "flex-start",
+              "bindState": true,
+              "label": {
+                "text": {
+                  "zh_CN": "水平对齐方式"
+                }
+              },
+              "cols": 12,
+              "rules": [],
+              "widget": {
+                "component": "SelectConfigurator",
+                "props": {
+                  "options": [
+                    {
+                      "label": "flex-start",
+                      "value": "flex-start"
+                    },
+                    {
+                      "label": "flex-end",
+                      "value": "flex-end"
+                    },
+                    {
+                      "label": "center",
+                      "value": "center"
+                    },
+                    {
+                      "label": "space-between",
+                      "value": "space-between"
+                    },
+                    {
+                      "label": "space-around",
+                      "value": "space-around"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "property": "alignItems",
+              "type": "String",
+              "defaultValue": "center",
+              "bindState": true,
+              "label": {
+                "text": {
+                  "zh_CN": "垂直对齐方式"
+                }
+              },
+              "cols": 12,
+              "rules": [],
+              "widget": {
+                "component": "SelectConfigurator",
+                "props": {
+                  "options": [
+                    {
+                      "label": "center",
+                      "value": "center"
+                    },
+                    {
+                      "label": "flex-end",
+                      "value": "flex-end"
+                    },
+                    {
+                      "label": "flex-start",
+                      "value": "flex-start"
+                    },
+                    {
+                      "label": "baseline",
+                      "value": "baseline"
+                    },
+                    {
+                      "label": "stretch",
+                      "value": "stretch"
+                    }
+                  ]
+                }
+              }
             }
           ]
         }
@@ -127,10 +207,10 @@
       "zh_CN": "弹性盒子容器"
     },
     "screenshot": "",
-    "snippetName": "FlexBox",
+    "snippetName": "CanvasFlexBox",
     "icon": "Box",
     "schema": {
-      "componentName": "FlexBox",
+      "componentName": "CanvasFlexBox",
       "props": {
         "flexDirection": "row",
         "gap": "8px",
