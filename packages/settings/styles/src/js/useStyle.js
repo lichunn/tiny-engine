@@ -12,7 +12,7 @@
 
 import { computed, reactive, watch } from 'vue'
 import { useBroadcastChannel } from '@vueuse/core'
-import { useCanvas, useHistory, useProperties as useProps } from '@opentiny/tiny-engine-meta-register'
+import { useCanvas, useHistory, useProperties as useProps, getOptions } from '@opentiny/tiny-engine-meta-register'
 import { formatString } from '@opentiny/tiny-engine-common/js/ast'
 import { constants, utils } from '@opentiny/tiny-engine-utils'
 import { parser, stringify, getSelectorArr } from './parser'
@@ -307,6 +307,13 @@ const updateStyle = (properties) => {
   const { addHistory } = useHistory()
   const { getSchema: getCanvasPageSchema, updateRect } = canvasApi.value
   const schema = getSchema() || getCanvasPageSchema()
+  const pageOptions = getOptions('engine.plugins.appmanage')
+  const materialsOptions = getOptions('engine.plugins.materials')
+  const baseClassGroup = [
+    `.${pageOptions.pageBaseStyle.className}`,
+    `.${materialsOptions.blockBaseStyle.className}`,
+    `.${materialsOptions.componentBaseStyle.className}`
+  ]
   schema.props = schema.props || {}
 
   if (properties) {
@@ -321,7 +328,7 @@ const updateStyle = (properties) => {
   const classNames = schema.props.className || ''
 
   // 不存在选择器，需要生成一个随机类名，添加到当前选中组件中，然后写入到全局样式
-  if (!currentSelector && typeof classNames === 'string') {
+  if ((!currentSelector || baseClassGroup.includes(currentSelector)) && typeof classNames === 'string') {
     randomClassName = genRandomClassNames(schema?.componentName || 'component')
     let newClassNames = randomClassName.slice(1)
 
