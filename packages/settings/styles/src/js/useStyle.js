@@ -255,7 +255,7 @@ watch(
       (value) => value.pureSelector === classNameList && value.mouseState === mouseState
     )
     const style = matchStyles.length ? matchStyles[0].rules : {}
-    state.style = style
+    state.style = { ...style }
   },
   {
     deep: true
@@ -288,7 +288,7 @@ const updateGlobalStyle = (newSelector) => {
 
   state.styleObject[currentSelector] = {
     ...(state.styleObject[currentSelector] || {}),
-    rules: state.style
+    rules: { ...state.style }
   }
 
   if (!Object.keys(state.style).length) {
