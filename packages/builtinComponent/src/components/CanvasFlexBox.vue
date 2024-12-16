@@ -48,5 +48,8 @@ const styles = computed(() => ({
   padding: v-bind('styles.padding');
   align-items: v-bind('styles.alignItems');
   justify-content: v-bind('styles.justifyContent');
+  :deep(.canvas-container) {
+    width: 100%;
+  }
 }
 </style>
