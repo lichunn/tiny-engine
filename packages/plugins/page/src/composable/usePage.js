@@ -59,13 +59,22 @@ const isTemporaryPage = reactive({
 })
 
 const generateCssString = (pageOptions, materialsOptions) => {
+  if (!pageOptions?.pageBaseStyle?.className || !pageOptions?.pageBaseStyle?.style) {
+    return ''
+  }
+
+  const formatCssRule = (className, style) => `.${className} {\n  ${style.trim()}\n}\n`
   const baseStyle = `.${pageOptions.pageBaseStyle.className}{\r\n ${pageOptions.pageBaseStyle.style}\r\n}\r\n`
 
   if (!materialsOptions.useBaseStyle) {
     return baseStyle
   }
 
-  return `${baseStyle}.${materialsOptions.blockBaseStyle.className}{\r\n ${materialsOptions.blockBaseStyle.style}\r\n}\r\n.${materialsOptions.componentBaseStyle.className}{\r\n ${materialsOptions.componentBaseStyle.style}\r\n}\r\n`
+  return [
+    formatCssRule(pageOptions.pageBaseStyle.className, pageOptions.pageBaseStyle.style),
+    formatCssRule(materialsOptions.blockBaseStyle.className, materialsOptions.blockBaseStyle.style),
+    formatCssRule(materialsOptions.componentBaseStyle.className, materialsOptions.componentBaseStyle.style)
+  ].join('\n')
 }
 
 const getDefaultPage = () => {
