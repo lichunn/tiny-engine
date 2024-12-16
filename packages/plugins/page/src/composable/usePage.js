@@ -58,18 +58,31 @@ const isTemporaryPage = reactive({
   saved: false
 })
 
+const generateCssString = (pageOptions, materialsOptions) => {
+  const baseStyle = `.${pageOptions.pageBaseStyle.className}{\r\n ${pageOptions.pageBaseStyle.style}\r\n}\r\n`
+
+  if (!materialsOptions.useBaseStyle) {
+    return baseStyle
+  }
+
+  return `${baseStyle}.${materialsOptions.blockBaseStyle.className}{\r\n ${materialsOptions.blockBaseStyle.style}\r\n}\r\n.${materialsOptions.componentBaseStyle.className}{\r\n ${materialsOptions.componentBaseStyle.style}\r\n}\r\n`
+}
+
 const getDefaultPage = () => {
   const materialsOptions = getOptions('engine.plugins.materials')
   const pageOptions = getOptions('engine.plugins.appmanage')
 
-  DEFAULT_PAGE.page_content.props.className = pageOptions.pageBaseStyle.className
-  DEFAULT_PAGE.page_content.css =
-    `.${pageOptions.pageBaseStyle.className}{\r\n  ${pageOptions.pageBaseStyle.style}\r\n}\r\n` +
-    (materialsOptions.useBaseStyle
-      ? `.${materialsOptions.blockBaseStyle.className}{\r\n  ${materialsOptions.blockBaseStyle.style}\r\n}\r\n.${materialsOptions.componentBaseStyle.className}{\r\n  ${materialsOptions.componentBaseStyle.style}\r\n}\r\n`
-      : '')
-
-  return DEFAULT_PAGE
+  return {
+    ...DEFAULT_PAGE,
+    page_content: {
+      ...DEFAULT_PAGE.page_content,
+      props: {
+        ...DEFAULT_PAGE.page_content.props,
+        className: pageOptions.pageBaseStyle.className
+      },
+      css: generateCssString(pageOptions, materialsOptions)
+    }
+  }
 }
 
 const isCurrentDataSame = () => {

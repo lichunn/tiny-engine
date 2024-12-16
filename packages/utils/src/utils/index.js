@@ -412,7 +412,10 @@ export const styleString2Obj = (styleString) => {
   const styles = styleString.trim().split(';')
 
   const styleObject = styles.reduce((obj, pair) => {
-    const [key, value] = pair.split(':')
+    const colonIndex = pair.indexOf(':')
+    if (colonIndex === -1) return obj
+    const key = pair.slice(0, colonIndex)
+    const value = pair.slice(colonIndex + 1)
     if (key && value) {
       obj[toCamelCase(key.trim())] = value.trim()
     }
@@ -428,11 +431,7 @@ export const styleString2Obj = (styleString) => {
  */
 
 export const obj2StyleString = (obj) => {
-  let str = ''
-
-  for (let key in obj) {
-    str += `${convertCamelToKebab(key)}: ${obj[key]}; `
-  }
-  str = str.slice(0, -2)
-  return str
+  return Object.entries(obj)
+    .map(([key, value]) => `${convertCamelToKebab(key)}: ${value}`)
+    .join('; ')
 }

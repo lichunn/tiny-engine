@@ -81,12 +81,12 @@ const resetBlockCanvasState = async (state = {}) => {
 }
 
 const getDefaultSchema = (componentName = 'Page', fileName = '') => {
-  const DEFAULT_PAGE = getMetaApi('engine.service.page').getDefaultPage()
+  const DEFAULT_PAGE = getMetaApi('engine.service.page')?.getDefaultPage() || { page_content: { props: {}, css: '' } }
 
   return {
     ...defaultSchema,
-    props: DEFAULT_PAGE.page_content.props,
-    css: DEFAULT_PAGE.page_content.css,
+    props: DEFAULT_PAGE.page_content?.props || {},
+    css: DEFAULT_PAGE.page_content?.css || '',
     componentName,
     fileName
   }
