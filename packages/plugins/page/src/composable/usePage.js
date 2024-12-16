@@ -72,6 +72,10 @@ const getDefaultPage = () => {
   const materialsOptions = getOptions('engine.plugins.materials')
   const pageOptions = getOptions('engine.plugins.appmanage')
 
+  if (!materialsOptions || !pageOptions || !pageOptions.pageBaseStyle) {
+    return { ...DEFAULT_PAGE }
+  }
+
   return {
     ...DEFAULT_PAGE,
     page_content: {

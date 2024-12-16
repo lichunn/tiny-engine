@@ -399,7 +399,10 @@ export const toCamelCase = (str) => {
  */
 
 export const convertCamelToKebab = (string) => {
-  return string.replace(/([A-Z])/g, '-$1').toLowerCase()
+  return string
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1-$2')
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .toLowerCase()
 }
 
 /**
@@ -409,8 +412,11 @@ export const convertCamelToKebab = (string) => {
  */
 
 export const styleString2Obj = (styleString) => {
-  const styles = styleString.trim().split(';')
+  if (!styleString || typeof styleString !== 'string') {
+    return {}
+  }
 
+  const styles = styleString.trim().split(';')
   const styleObject = styles.reduce((obj, pair) => {
     const colonIndex = pair.indexOf(':')
     if (colonIndex === -1) return obj
@@ -431,7 +437,12 @@ export const styleString2Obj = (styleString) => {
  */
 
 export const obj2StyleString = (obj) => {
+  if (!obj || typeof obj !== 'object') {
+    return ''
+  }
+
   return Object.entries(obj)
+    .filter(([, value]) => value != null)
     .map(([key, value]) => `${convertCamelToKebab(key)}: ${value}`)
     .join('; ')
 }
