@@ -5,7 +5,7 @@ const defaultOption = {
   path: './src/router'
 }
 
-function flattenRoutes(routes, parentPath = '') {
+const flattenRoutes = (routes, parentPath = '') => {
   return routes.reduce((acc, route) => {
     const fullPath = `${parentPath}${route.path}`
 
