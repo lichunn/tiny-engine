@@ -5,44 +5,55 @@ const defaultOption = {
   path: './src/router'
 }
 
-const transformRoutes = (routes) => {
-  const result = []
-  const processRoutes = (currentRoutes, basePath = '') => {
-    currentRoutes.forEach((route) => {
-      const fullPath = basePath
-        ? `${basePath}${route.path.startsWith('/') ? route.path : '/' + route.path}`
-        : route.path
+function flattenRoutes(routes, parentPath = '') {
+  return routes.reduce((acc, route) => {
+    const fullPath = `${parentPath}${route.path}`
 
+    if (route.path !== '/') {
       if (route.component) {
-        // 如果路由有component，直接添加到结果数组中
-        result.push({
+        // 如果存在 component，则直接添加路由
+        const newRoute = {
           path: fullPath,
           component: route.component,
-          ...(route.children
-            ? {
-                children: route.children.map((child) => ({
-                  ...child,
-                  path: child.path.startsWith('/') ? child.path : `/${child.path}`
-                }))
-              }
-            : {})
-        })
-      } else if (route.children && route.children.length > 0) {
-        // 如果路由没有component但有children
-        processRoutes(route.children, fullPath)
-      }
-    })
-  }
-  processRoutes(routes)
+          children: flattenRoutes(route.children)
+        }
+        const redirectChild = route.children.find((item) => item.isDefault)
 
-  return result
+        if (route.children && redirectChild) {
+          newRoute.redirect = `${fullPath}/${redirectChild.path}`
+        }
+
+        acc.push(newRoute)
+      } else if (route.children && route.children.length > 0) {
+        // 如果不存在 component 但有 children，则递归处理 children
+        const children = flattenRoutes(route.children, fullPath + '/')
+        // 将处理后的 children 合并到上一层存在 component 的路由中
+        acc.push(...children)
+      }
+      // 如果既没有 component 也没有 children，则不做任何处理
+    } else {
+      acc.push(route)
+    }
+
+    return acc
+  }, [])
 }
 
 const convertToNestedRoutes = (schema) => {
-  const { pageSchema } = schema
+  const pageSchema = schema.pageSchema?.sort((a, b) => a.meta?.router?.length - b.meta?.router?.length)
   const result = []
+  let home = {}
+  let isGetHome = false
 
   pageSchema.forEach((item) => {
+    if ((item.meta.isHome || item.meta.isDefault) && !isGetHome) {
+      home = {
+        path: '/',
+        redirect: `/${item.meta.router}`
+      }
+      isGetHome = true
+    }
+
     const parts = item.meta?.router?.split('/').filter(Boolean)
     let curretnLevel = result
 
@@ -57,6 +68,7 @@ const convertToNestedRoutes = (schema) => {
           break
         }
       }
+
       if (!found) {
         // 如果不存在该路径部分，创建一个新节点
         const newNode = {
@@ -65,8 +77,8 @@ const convertToNestedRoutes = (schema) => {
         }
         // 如果路径是最后一步，则设置组件和属性
         if (index === parts.length - 1) {
-          // if(path === '/')
           newNode.component = `() => import('@/views${item.path ? `/${item.path}` : ''}/${item.fileName}.vue')`
+          newNode.isDefault = item.meta.isDefault
         }
 
         curretnLevel.push(newNode)
@@ -75,14 +87,16 @@ const convertToNestedRoutes = (schema) => {
     })
   })
 
-  return transformRoutes(result)
+  if (home.path) {
+    result.unshift(home)
+  }
+
+  return flattenRoutes(result)
 }
 
 // 示例路由数组
-
 function genRouterPlugin(options = {}) {
   const realOptions = mergeOptions(defaultOption, options)
-
   const { path, fileName } = realOptions
 
   return {
