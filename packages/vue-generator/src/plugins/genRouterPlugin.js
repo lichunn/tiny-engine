@@ -109,6 +109,10 @@ function genRouterPlugin(options = {}) {
      */
     run(schema) {
       const routesList = convertToNestedRoutes(schema)
+      const resultStr = JSON.stringify(routesList, null, 2).replace(
+        /("component":\s*)"(.*?)"/g,
+        (match, p1, p2) => p1 + p2
+      )
 
       // TODO: 支持 hash 模式、history 模式
       const importSnippet = "import { createRouter, createWebHashHistory } from 'vue-router'"
@@ -118,7 +122,7 @@ function genRouterPlugin(options = {}) {
         routes
       })`
 
-      const routeSnippets = `const routes = ${JSON.stringify(routesList, null, 2)}`
+      const routeSnippets = `const routes = ${resultStr}`
 
       const res = {
         fileType: 'js',
