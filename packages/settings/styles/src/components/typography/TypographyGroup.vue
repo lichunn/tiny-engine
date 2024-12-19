@@ -333,44 +333,8 @@ export default {
       }
     ]
 
-    const sizeOptions = [
-      {
-        label: '9',
-        value: '9'
-      },
-      {
-        label: '10',
-        value: '10'
-      },
-      {
-        label: '11',
-        value: '11'
-      },
-      {
-        label: '12',
-        value: '12'
-      },
-      {
-        label: '14',
-        value: '14'
-      },
-      {
-        label: '16',
-        value: '16'
-      },
-      {
-        label: '18',
-        value: '18'
-      },
-      {
-        label: '20',
-        value: '20'
-      },
-      {
-        label: '24',
-        value: '24'
-      }
-    ]
+    const sizes = ['9', '10', '11', '12', '14', '16', '18', '20', '24']
+    const sizeOptions = sizes.map((size) => ({ label: size, value: size }))
 
     const alignOptions = [
       {
