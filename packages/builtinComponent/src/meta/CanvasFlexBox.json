@@ -2,7 +2,7 @@
   "component": {
     "icon": "Box",
     "name": {
-      "zh_CN": "弹性盒子容器"
+      "zh_CN": "弹性容器"
     },
     "component": "CanvasFlexBox",
     "schema": {
@@ -39,19 +39,19 @@
                 "props": {
                   "options": [
                     {
-                      "label": "row",
+                      "label": "水平,起点在左端",
                       "value": "row"
                     },
                     {
-                      "label": "row-reverse",
+                      "label": "水平,起点在右端",
                       "value": "row-reverse"
                     },
                     {
-                      "label": "column",
+                      "label": "垂直,起点在上沿",
                       "value": "column"
                     },
                     {
-                      "label": "column-reverse",
+                      "label": "垂直,起点在下沿",
                       "value": "column-reverse"
                     }
                   ]
@@ -104,23 +104,23 @@
                 "props": {
                   "options": [
                     {
-                      "label": "flex-start",
+                      "label": "左对齐",
                       "value": "flex-start"
                     },
                     {
-                      "label": "flex-end",
+                      "label": "右对齐",
                       "value": "flex-end"
                     },
                     {
-                      "label": "center",
+                      "label": "居中",
                       "value": "center"
                     },
                     {
-                      "label": "space-between",
+                      "label": "两端对齐,子元素间隔相等",
                       "value": "space-between"
                     },
                     {
-                      "label": "space-around",
+                      "label": "子元素两侧间隔相等",
                       "value": "space-around"
                     }
                   ]
@@ -144,23 +144,23 @@
                 "props": {
                   "options": [
                     {
-                      "label": "center",
+                      "label": "交叉轴的中点对齐",
                       "value": "center"
                     },
                     {
-                      "label": "flex-end",
-                      "value": "flex-end"
-                    },
-                    {
-                      "label": "flex-start",
+                      "label": "交叉轴的起点对齐",
                       "value": "flex-start"
                     },
                     {
-                      "label": "baseline",
+                      "label": "交叉轴的终点对齐",
+                      "value": "flex-end"
+                    },
+                    {
+                      "label": "以子元素第一行文字的基线对齐",
                       "value": "baseline"
                     },
                     {
-                      "label": "stretch",
+                      "label": "占满容器高度",
                       "value": "stretch"
                     }
                   ]
@@ -204,7 +204,7 @@
   },
   "snippet": {
     "name": {
-      "zh_CN": "弹性盒子容器"
+      "zh_CN": "弹性容器"
     },
     "screenshot": "",
     "snippetName": "CanvasFlexBox",

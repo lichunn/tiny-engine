@@ -2,7 +2,7 @@
   "component": {
     "icon": "Box",
     "name": {
-      "zh_CN": "Section"
+      "zh_CN": "全宽居中布局"
     },
     "component": "CanvasSection",
     "schema": {
@@ -58,7 +58,7 @@
   },
   "snippet": {
     "name": {
-      "zh_CN": "Section"
+      "zh_CN": "全宽居中布局"
     },
     "screenshot": "",
     "snippetName": "CanvasSection",
