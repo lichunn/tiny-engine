@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { ref, watch, onUnmounted } from 'vue'
+import { ref, watch, onUnmounted, onMounted } from 'vue'
 import {
   useProperties,
   useCanvas,
@@ -26,11 +26,14 @@ import {
   useMaterial,
   useHistory,
   useModal,
+  usePage,
+  useMessage,
   getMergeRegistry,
   getMergeMeta,
   getOptions,
   getMetaApi,
-  META_SERVICE
+  META_SERVICE,
+  META_APP
 } from '@opentiny/tiny-engine-meta-register'
 import { constants } from '@opentiny/tiny-engine-utils'
 import * as ast from '@opentiny/tiny-engine-common/js/ast'
@@ -169,6 +172,29 @@ export default {
       canvasResizeObserver?.disconnect?.()
     })
 
+    const { addToCallbackFns: addHistoryDataChangedCallback } = (function () {
+      const callbackFns = new Set()
+
+      const { subscribe, unsubscribe } = useMessage()
+      const topic = 'locationHistoryChanged'
+      const callback = (value) => callbackFns.forEach((cb) => cb(value))
+
+      onMounted(() => {
+        subscribe({ topic, callback })
+      })
+
+      onUnmounted(() => {
+        unsubscribe({ topic, callback })
+      })
+      function addToCallbackFns(cb) {
+        callbackFns.add(cb)
+        return () => callbackFns.delete(cb)
+      }
+      return {
+        addToCallbackFns
+      }
+    })()
+
     return {
       removeNode,
       canvasSrc,
@@ -183,6 +209,10 @@ export default {
         addHistory: useHistory().addHistory,
         registerBlock: useMaterial().registerBlock,
         request: getMetaApi(META_SERVICE.Http).getHttp(),
+        getPageById: getMetaApi(META_APP.AppManage).getPageById,
+        getPageAncestors: usePage().getAncestors,
+        getBaseInfo: () => getMetaApi(META_SERVICE.GlobalService).getBaseInfo(),
+        addHistoryDataChangedCallback,
         ast
       },
       CanvasLayout,
