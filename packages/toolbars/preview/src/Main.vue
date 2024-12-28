@@ -30,7 +30,7 @@ export default {
   setup() {
     const { isBlock, getCurrentPage, canvasApi } = useCanvas()
     const { getCurrentBlock } = useBlock()
-    const { getPageChildrenList } = usePage()
+    const { getFamily } = usePage()
 
     const preview = async () => {
       const { beforePreview, previewMethod, afterPreview } = getOptions(meta.id)
@@ -80,7 +80,8 @@ export default {
         const page = getCurrentPage()
         params.id = page?.id
         params.pageInfo.name = page?.name
-        params.pageChildInfo = await getPageChildrenList(params.id)
+        // params.pageChildInfo = await getPageChildrenList(params.id)
+        params.ancestors = await getFamily(params.id)
         previewPage(params)
       }
 
