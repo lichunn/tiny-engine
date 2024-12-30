@@ -43,6 +43,7 @@ export default {
     const debugSwitch = injectDebugSwitch()
     const editorComponent = computed(() => (debugSwitch?.value ? Monaco : EmptyEditor))
     const store = new ReplStore()
+    const { getAllNestedBlocksSchema, generatePageCode } = getMetaApi('engine.service.generateCode')
 
     const sfcOptions = {
       script: {
@@ -84,6 +85,48 @@ export default {
       return getInitImportMap()
     }
 
+    const getFamilyPages = (appData) => {
+      let familyPages = []
+      const ancestors = queryParams.ancestors
+
+      for (let i = 0; i < ancestors.length; i++) {
+        const nextPage = i < ancestors.length - 1 ? ancestors[i + 1].name : null
+        if (ancestors[i]?.parentId === '0') {
+          familyPages.push({
+            panelName: 'Main.vue',
+            panelValue:
+              generatePageCode(
+                ancestors[i].page_content,
+                appData?.componentsMap || [],
+                {
+                  blockRelativePath: './'
+                },
+                nextPage
+              ) || '',
+            panelType: 'vue',
+            index: true
+          })
+        } else {
+          familyPages.push({
+            panelName: `${ancestors[i].name}.vue`,
+            panelValue:
+              generatePageCode(
+                ancestors[i].page_content,
+                appData?.componentsMap || [],
+                {
+                  blockRelativePath: './'
+                },
+                nextPage
+              ) || '',
+            panelType: 'vue',
+            index: false
+          })
+        }
+      }
+
+      return familyPages
+    }
+
     const promiseList = [
       fetchAppSchema(queryParams?.app),
       fetchMetaData(queryParams),
@@ -93,41 +136,12 @@ export default {
     Promise.all(promiseList).then(async ([appData, metaData, _void, importMapData]) => {
       addUtilsImportMap(importMapData, metaData.utils || [])
 
-      const { getAllNestedBlocksSchema, generatePageCode } = getMetaApi('engine.service.generateCode')
-
       const blocks = await getAllNestedBlocksSchema(queryParams.pageInfo?.schema, fetchBlockSchema)
-
-      const familyPages =
-        queryParams.ancestors?.familyPagesInfo.length > 1
-          ? queryParams.ancestors?.familyPagesInfo.map((page) => {
-              if (page.parentId === '0') {
-                return {
-                  panelName: 'Main.vue',
-                  panelValue:
-                    generatePageCode(page.page_content, appData?.componentsMap || [], {
-                      blockRelativePath: './'
-                    }) || '',
-                  panelType: 'vue',
-                  index: true
-                }
-              } else {
-                return {
-                  panelName: `${page.name}.vue`,
-                  panelValue:
-                    generatePageCode(page.page_content, appData?.componentsMap || [], {
-                      blockRelativePath: './'
-                    }) || '',
-                  panelType: 'vue',
-                  index: false
-                }
-              }
-            })
-          : []
 
       // TODO: 需要验证级联生成 block schema
       // TODO: 物料内置 block 需要如何处理？
       const pageCode = [
-        ...familyPages,
+        ...getFamilyPages(appData),
         ...(blocks || []).map((blockSchema) => {
           return {
             panelName: `${blockSchema.fileName}.vue`,
@@ -190,7 +204,6 @@ export default {
       Object.assign(newFiles, metaFiles)
 
       setFiles(newFiles)
-      // debugger
       return PreviewTips.READY_FOR_PREVIEW
     })
 

@@ -211,34 +211,6 @@ const getPageList = async (appId) => {
   return pageSettingState.pages
 }
 
-let pageChildren = []
-
-const findChild = (pages, pageId) => {
-  pages.forEach((pageItem) => {
-    if (pageItem.id === String(pageId)) {
-      pageChildren = pageItem.children ? pageItem.children : []
-      return
-    } else {
-      // 如果当前元素满足条件，将其添加到结果中
-      if (pageItem.children) {
-        findChild(pageItem.children, pageId)
-      }
-    }
-  })
-
-  return pageChildren
-}
-
-const getPageChildrenList = async (pageId) => {
-  if (pageSettingState.pages.length === 0) {
-    const appId = getMetaApi(META_SERVICE.GlobalService).getBaseInfo().id
-    await getPageList(appId)
-  }
-  const pages = pageSettingState.pages.find((item) => item.groupName === '静态页面').data
-
-  return findChild(pages, pageId)
-}
-
 /**
  * @param {string | number} id
  * @param {(string | number)[]} ancestors
@@ -275,15 +247,10 @@ const getAncestors = async (id, withFolders) => {
   return ancestors.filter((item) => item.isPage).map((item) => item.id)
 }
 
-const getFamily = async (id) => {
-  const familyPagesInfo = getAncestorsRecursively(id).filter((item) => item.isPage)
-  const ancestorsPageInfo = familyPagesInfo.find((page) => page.parentId === '0')
-
-  return {
-    ancestorsPageInfo,
-    familyPagesInfo
-  }
-}
+const getFamily = async (id) =>
+  getAncestorsRecursively(id)
+    .filter((item) => item.isPage)
+    .reverse()
 
 export default () => {
   return {
@@ -299,7 +266,6 @@ export default () => {
     initCurrentPageData,
     isChangePageData,
     getPageList,
-    getPageChildrenList,
     getAncestors,
     getFamily,
     STATIC_PAGE_GROUP_ID,
