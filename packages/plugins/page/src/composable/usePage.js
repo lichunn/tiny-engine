@@ -247,10 +247,16 @@ const getAncestors = async (id, withFolders) => {
   return ancestors.filter((item) => item.isPage).map((item) => item.id)
 }
 
-const getFamily = async (id) =>
-  getAncestorsRecursively(id)
+const getFamily = async (id) => {
+  if (pageSettingState.pages.length === 0) {
+    const appId = getMetaApi(META_SERVICE.GlobalService).getBaseInfo().id
+    await getPageList(appId)
+  }
+
+  return getAncestorsRecursively(id)
     .filter((item) => item.isPage)
     .reverse()
+}
 
 export default () => {
   return {
