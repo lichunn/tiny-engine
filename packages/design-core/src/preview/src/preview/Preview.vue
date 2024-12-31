@@ -44,6 +44,7 @@ export default {
     const editorComponent = computed(() => (debugSwitch?.value ? Monaco : EmptyEditor))
     const store = new ReplStore()
     const { getAllNestedBlocksSchema, generatePageCode } = getMetaApi('engine.service.generateCode')
+    const ROOT_ID = '0'
 
     const sfcOptions = {
       script: {
@@ -86,39 +87,34 @@ export default {
     }
 
     const getFamilyPages = (appData) => {
-      let familyPages = []
+      const familyPages = []
       const ancestors = queryParams.ancestors
 
       for (let i = 0; i < ancestors.length; i++) {
         const nextPage = i < ancestors.length - 1 ? ancestors[i + 1].name : null
-        if (ancestors[i]?.parentId === '0') {
+        const panelValueAndType = {
+          panelValue:
+            generatePageCode(
+              ancestors[i].page_content,
+              appData?.componentsMap || [],
+              {
+                blockRelativePath: './'
+              },
+              nextPage
+            ) || '',
+          panelType: 'vue'
+        }
+
+        if (ancestors[i]?.parentId === ROOT_ID) {
           familyPages.push({
+            ...panelValueAndType,
             panelName: 'Main.vue',
-            panelValue:
-              generatePageCode(
-                ancestors[i].page_content,
-                appData?.componentsMap || [],
-                {
-                  blockRelativePath: './'
-                },
-                nextPage
-              ) || '',
-            panelType: 'vue',
             index: true
           })
         } else {
           familyPages.push({
+            ...panelValueAndType,
             panelName: `${ancestors[i].name}.vue`,
-            panelValue:
-              generatePageCode(
-                ancestors[i].page_content,
-                appData?.componentsMap || [],
-                {
-                  blockRelativePath: './'
-                },
-                nextPage
-              ) || '',
-            panelType: 'vue',
             index: false
           })
         }

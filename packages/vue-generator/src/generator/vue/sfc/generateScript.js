@@ -7,15 +7,15 @@ import { hasJsx } from '@/utils/hasJsx'
 
 export const defaultGenImportHook = (schema, globalHooks, config, nextPage) => {
   const dependenciesMap = globalHooks.getImport() || {}
-  const ImportContent = Object.entries(dependenciesMap).map(([key, value]) => {
+  const importContent = Object.entries(dependenciesMap).map(([key, value]) => {
     return generateImportByPkgName({ pkgName: key, imports: value }) || ''
   })
 
   if (nextPage) {
-    ImportContent.push(`import ${nextPage} from "./${nextPage}.vue"`)
+    importContent.push(`import ${nextPage} from "./${nextPage}.vue"`)
   }
 
-  return ImportContent.join('\n')
+  return importContent.join('\n')
 }
 
 export const defaultGenPropsHook = (schema) => {
