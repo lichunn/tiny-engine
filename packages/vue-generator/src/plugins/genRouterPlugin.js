@@ -21,7 +21,7 @@ const flattenRoutes = (routes, parentPath = '') => {
         const redirectChild = route.children.find((item) => item.isDefault)
 
         if (route.children && redirectChild) {
-          newRoute.redirect = { name: `${redirectChild.name}` }
+          newRoute.redirect = { name: redirectChild.name }
         }
 
         acc.push(newRoute)
@@ -50,7 +50,7 @@ const convertToNestedRoutes = (schema) => {
     if ((item.meta.isHome || item.meta.isDefault) && !isGetHome) {
       home = {
         path: '',
-        redirect: { name: `${item.meta.id}` }
+        redirect: { name: item.meta.id }
       }
       isGetHome = true
     }
