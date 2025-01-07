@@ -6,7 +6,7 @@
         <div class="toolbar-start">
           <slot name="toolbarStart"></slot>
         </div>
-        <div :class="['buttons', { fullscreen: fullscreen }]" id="icon-buttons">
+        <div :class="['buttons', { 'engine-fullscreen': fullscreen }]" id="icon-buttons">
           <slot name="buttons"></slot>
           <tiny-tooltip
             v-if="showFormatBtn && options.language === 'json'"
@@ -148,7 +148,7 @@ export default {
   top: var(--base-top-panel-height);
   bottom: 0;
   left: calc(var(--base-nav-panel-width) + var(--base-left-panel-width));
-  right: var(--base-left-panel-width);
+  right: var(--base-right-panel-width);
   z-index: 100;
   padding: 10px 16px 16px 16px;
   background-color: var(--ti-lowcode-common-component-bg);
@@ -172,7 +172,7 @@ export default {
       color: var(--te-common-icon-secondary);
     }
   }
-  .fullscreen {
+  .engine-fullscreen {
     display: flex;
     margin-right: 20px;
   }
