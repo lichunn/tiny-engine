@@ -121,7 +121,7 @@ function genRouterPlugin(options = {}) {
       const exportSnippet = `
       export default createRouter({
         history: createWebHashHistory(),
-        routes
+        routes: [{path: '/',children: routes}]
       })`
 
       const routeSnippets = `const routes = ${resultStr}`
