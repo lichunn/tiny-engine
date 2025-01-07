@@ -247,15 +247,28 @@ const getAncestors = async (id, withFolders) => {
   return ancestors.filter((item) => item.isPage).map((item) => item.id)
 }
 
+const getPageDetailList = async (pages) => {
+  if (pages.length > 0 && !pages[0].page_content) {
+    for (let i = 0; i < pages.length; i++) {
+      const pageDetail = await http.fetchPageDetail(pages[i].id)
+      pages[i].page_content = pageDetail.page_content
+    }
+  }
+}
+
 const getFamily = async (id) => {
   if (pageSettingState.pages.length === 0) {
     const appId = getMetaApi(META_SERVICE.GlobalService).getBaseInfo().id
     await getPageList(appId)
   }
 
-  return getAncestorsRecursively(id)
+  const familytPages = getAncestorsRecursively(id)
     .filter((item) => item.isPage)
     .reverse()
+
+  await getPageDetailList(familytPages)
+
+  return familytPages
 }
 
 export default () => {
