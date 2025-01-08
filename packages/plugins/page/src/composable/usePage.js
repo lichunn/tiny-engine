@@ -249,9 +249,9 @@ const getAncestors = async (id, withFolders) => {
 
 const getPageDetailList = async (pages) => {
   if (pages.length > 0 && !pages[0].page_content) {
-    for (let page of pages) {
+    for (const page of pages) {
       const pageDetail = await http.fetchPageDetail(page.id)
-      pages.page_content = pageDetail.page_content
+      page.page_content = pageDetail.page_content
     }
   }
 }
