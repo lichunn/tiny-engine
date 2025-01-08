@@ -4,7 +4,7 @@ export function getImportMapData(overrideVersions = {}, canvasDeps = { scripts: 
   const importMapVersions = Object.assign(
     {
       vue: '3.4.23',
-      tinyVue: '~3.14',
+      tinyVue: '~3.20',
       vueI18n: '^9.9.0'
     },
     overrideVersions
