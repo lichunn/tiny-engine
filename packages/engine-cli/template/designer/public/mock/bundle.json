@@ -2730,7 +2730,7 @@
             "exportName": "CarouselItem",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -2863,7 +2863,7 @@
             "exportName": "Carousel",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -4537,7 +4537,7 @@
             "exportName": "ButtonGroup",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -4695,7 +4695,7 @@
             "exportName": "Row",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -4845,7 +4845,7 @@
             "exportName": "Layout",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -4952,7 +4952,7 @@
             "exportName": "Form",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -5306,7 +5306,7 @@
             "exportName": "FormItem",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -5438,7 +5438,7 @@
             "exportName": "Col",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -5716,7 +5716,7 @@
             "exportName": "Button",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -6055,7 +6055,7 @@
             "exportName": "Input",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -6469,7 +6469,7 @@
             "exportName": "Radio",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -6706,7 +6706,7 @@
             "exportName": "Select",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -7111,7 +7111,7 @@
             "exportName": "Switch",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -7310,7 +7310,7 @@
             "exportName": "Search",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -7585,7 +7585,7 @@
             "exportName": "Checkbox",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -7844,7 +7844,7 @@
             "exportName": "CheckboxButton",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -8032,7 +8032,7 @@
             "exportName": "CheckboxGroup",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -8241,7 +8241,7 @@
             "exportName": "DialogBox",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -8519,7 +8519,7 @@
             "exportName": "Tabs",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -8800,7 +8800,7 @@
             "exportName": "TabItem",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -8909,7 +8909,7 @@
             "exportName": "Breadcrumb",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -9048,7 +9048,7 @@
             "exportName": "BreadcrumbItem",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -9137,7 +9137,7 @@
             "exportName": "Collapse",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -9264,7 +9264,7 @@
             "exportName": "CollapseItem",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -9375,7 +9375,7 @@
             "exportName": "Grid",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -10289,7 +10289,7 @@
             "exportName": "Pager",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -10522,7 +10522,7 @@
             "exportName": "Popeditor",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -10885,7 +10885,7 @@
             "exportName": "Tree",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -11220,7 +11220,7 @@
             "exportName": "TimeLine",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -11427,7 +11427,7 @@
             "exportName": "Tooltip",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -11648,7 +11648,7 @@
             "exportName": "Popover",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -12143,7 +12143,7 @@
             "exportName": "DatePicker",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
@@ -12558,7 +12558,7 @@
             "exportName": "Numeric",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
