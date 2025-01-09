@@ -4805,7 +4805,7 @@
             "exportName": "Layout",
             "version": "3.20.0",
             "destructuring": true,
-            "script": "https://unpkg.com/@opentiny/vue@~3.20/runtime/tiny-vue.mjs",
+            "script": "https://unpkg.com/@opentiny/vue-runtime@~3.20/dist3/tiny-vue-pc.mjs",
             "css": "https://unpkg.com/@opentiny/vue-theme@~3.20/index.css"
           },
           "group": "component",
