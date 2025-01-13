@@ -14,7 +14,6 @@ import { getCurrentInstance, nextTick, provide, inject } from 'vue'
 import { I18nInjectionKey } from 'vue-i18n'
 import { api } from './RenderMain'
 import { globalNotify } from './canvas-function'
-import { collectionMethodsMap } from './material-function'
 import { generateFn } from './data-function'
 
 export const lowcodeWrap = (props, context) => {
@@ -60,13 +59,13 @@ export const lowcodeWrap = (props, context) => {
 
   const wrap = (fn) => {
     if (typeof fn === 'function') {
-      const fnName = fn.name
-      if (fn.toString().includes('return this')) {
+      const fnString = fn.toString()
+
+      if (fnString.includes('return this')) {
         return () => global
-      } else if (fnName && collectionMethodsMap[fnName.slice(0, -1)]) {
-        // 这里区块打包的时候会在方法名称后面多加一个字符串，所以此处需要截取下函数名称
-        fn.realName = fnName.slice(0, -1)
-        return generateFn(fn)
+      } else if (/this\.dataSourceMap\.[0-9a-zA-Z_]+\.load\(\)/.test(fnString)) {
+        const renderContext = (inject('pageContext') as Ref<any>).value
+        return generateFn(fn, renderContext)
       } else if (fn.name === 'setter' || fn.name === 'getter') {
         // 这里需要保证在消费区块时，区块中的访问器函数可以正常执行
         return (...args) => {

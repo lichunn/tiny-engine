@@ -3,7 +3,7 @@ import { transformSync } from '@babel/core'
 import i18nHost from '@opentiny/tiny-engine-i18n-host'
 
 import { globalNotify } from '../canvas-function'
-import { collectionMethodsMap, customElements, getComponent, getIcon } from '../material-function'
+import { collectionMethodsMap, getComponent, getIcon } from '../material-function'
 import { newFn } from '../data-utils'
 import { renderDefault } from '../render'
 
@@ -61,8 +61,7 @@ const transformJSX = (code) => {
       [
         babelPluginJSX,
         {
-          pragma: 'h',
-          isCustomElement: (name) => customElements[name]
+          pragma: 'h'
         }
       ]
     ]
@@ -152,43 +151,39 @@ const parseJSXFunction = (data, _scope, ctx) => {
 export const generateFn = (innerFn, context?) => {
   return (...args) => {
     // 如果有数据源标识，则表格的fetchData返回数据源的静态数据
-    const sourceId = collectionMethodsMap[innerFn.realName || innerFn.name]
-    if (sourceId) {
-      return innerFn.call(context, ...args)
-    } else {
-      let result = null
 
-      // 这里是为了兼容用户写法报错导致画布异常，但无法捕获promise内部的异常
-      try {
-        result = innerFn.call(context, ...args)
-      } catch (error) {
-        globalNotify({
-          type: 'warning',
-          title: `函数:${innerFn.name}执行报错`,
-          message: error?.message || `函数:${innerFn.name}执行报错，请检查语法`
-        })
-      }
+    let result = null
 
-      // 这里注意如果innerFn返回的是一个promise则需要捕获异常，重新返回默认一条空数据
-      if (result.then) {
-        result = new Promise((resolve) => {
-          result.then(resolve).catch((error) => {
-            globalNotify({
-              type: 'warning',
-              title: '异步函数执行报错',
-              message: error?.message || '异步函数执行报错，请检查语法'
-            })
-            // 这里需要至少返回一条空数据，方便用户使用表格默认插槽
-            resolve({
-              result: [{}],
-              page: { total: 1 }
-            })
+    // 这里是为了兼容用户写法报错导致画布异常，但无法捕获promise内部的异常
+    try {
+      result = innerFn.call(context, ...args)
+    } catch (error) {
+      globalNotify({
+        type: 'warning',
+        title: `函数:${innerFn.name}执行报错`,
+        message: error?.message || `函数:${innerFn.name}执行报错，请检查语法`
+      })
+    }
+
+    // 这里注意如果innerFn返回的是一个promise则需要捕获异常，重新返回默认一条空数据
+    if (result.then) {
+      result = new Promise((resolve) => {
+        result.then(resolve).catch((error) => {
+          globalNotify({
+            type: 'warning',
+            title: '异步函数执行报错',
+            message: error?.message || '异步函数执行报错，请检查语法'
+          })
+          // 这里需要至少返回一条空数据，方便用户使用表格默认插槽
+          resolve({
+            result: [{}],
+            page: { total: 1 }
           })
         })
-      }
-
-      return result
+      })
     }
+
+    return result
   }
 }
 const parseJSFunction = (data, _scope, ctx) => {

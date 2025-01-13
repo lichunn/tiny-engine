@@ -71,7 +71,7 @@ export default {
   },
   setup() {
     const { pageState } = useCanvas()
-    const { pageSettingState, DEFAULT_PAGE, isTemporaryPage, initCurrentPageData } = usePage()
+    const { pageSettingState, getDefaultPage, isTemporaryPage, initCurrentPageData } = usePage()
 
     const pageTreeRef = ref(null)
     const ROOT_ID = pageSettingState.ROOT_ID
@@ -84,15 +84,24 @@ export default {
     const createNewPage = (group, parentId = ROOT_ID) => {
       closeFolderSettingPanel()
       pageSettingState.isNew = true
-      pageSettingState.currentPageData = {
-        ...DEFAULT_PAGE,
-        parentId,
-        route: '',
-        name: 'Untitled',
-        page_content: {
-          lifeCycles: {}
-        },
-        group
+      try {
+        const defaultPage = getDefaultPage()
+        if (!defaultPage) {
+          throw new Error('Failed to get default page configuration')
+        }
+        pageSettingState.currentPageData = {
+          ...getDefaultPage(),
+          ...defaultPage,
+          parentId,
+          route: '',
+          name: 'Untitled',
+          page_content: {
+            lifeCycles: {}
+          },
+          group
+        }
+      } catch (error) {
+        // console.error('Failed to create new page:', error)
       }
       pageSettingState.currentPageDataCopy = extend(true, {}, pageSettingState.currentPageData)
       state.isFolder = false

@@ -8,8 +8,6 @@ export function useProps(generateAccessor: ReturnType<typeof useAccessorMap>['ge
     Object.assign(props, data)
   }
 
-  const getProps = () => props
-
   const initProps = (properties = []) => {
     const props: Record<string, any> = {}
     const accessorFunctions: Array<ReturnType<typeof generateAccessor>> = []
@@ -38,7 +36,6 @@ export function useProps(generateAccessor: ReturnType<typeof useAccessorMap>['ge
   return {
     props,
     initProps,
-    getProps,
     setProps
   }
 }

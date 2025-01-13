@@ -27,11 +27,13 @@ import {
   getMetaApi,
   META_APP,
   getMergeMeta,
+  getOptions,
   META_SERVICE
 } from '@opentiny/tiny-engine-meta-register'
 import { useMessage } from '@opentiny/tiny-engine-meta-register'
 const { publish } = useMessage()
 const postLocationHistoryChanged = (data) => publish({ topic: 'locationHistoryChanged', data })
+import meta from '../../meta'
 
 const { SORT_TYPE, SCHEMA_DATA_TYPE, BLOCK_OPENNESS } = constants
 
@@ -279,16 +281,16 @@ const getBlockPageSchema = (block) => {
 }
 
 const initBlock = async (block = {}, _langs = {}, isEdit) => {
-  const { resetBlockCanvasState, setSaved } = useCanvas()
+  const { resetBlockCanvasState, setSaved, getSchema } = useCanvas()
   const { setBreadcrumbBlock } = useBreadcrumb()
 
   // 把区块的schema传递给画布
   await resetBlockCanvasState({ pageSchema: getBlockPageSchema(block) })
   // 这一步操作很重要，让区块管理面板和画布共同维护同一份区块schema
-  block.content = useCanvas().canvasApi.value?.getSchema()
+  block.content = getSchema()
 
   setCurrentBlock(block)
-  setBreadcrumbBlock([block[nameCn] || block.label], block.histories)
+  setBreadcrumbBlock([block[nameCn] || block.label])
 
   // 如果是点击区块管理列表进来的则不需要执行以下操作
   if (!isEdit) {
@@ -702,6 +704,14 @@ const cancelCheck = (block) => {
   selectedBlockArray.value = selectedBlockArray.value.filter((item) => item.id !== block.id)
 }
 
+const checkAll = (blockList) => {
+  selectedBlockArray.value = blockList
+}
+
+const cancelCheckAll = () => {
+  selectedBlockArray.value = []
+}
+
 const getBlockAssetsByVersion = (block, version) => {
   let assets = block.assets
 
@@ -716,6 +726,11 @@ const getBlockAssetsByVersion = (block, version) => {
   }
 
   return assets
+}
+
+const shouldReplaceCategoryWithGroup = () => {
+  const { mergeCategoriesAndGroups } = getOptions(meta.id)
+  return mergeCategoriesAndGroups
 }
 
 export default function () {
@@ -741,6 +756,8 @@ export default function () {
     sort,
     check,
     cancelCheck,
+    checkAll,
+    cancelCheckAll,
     getBlockList,
     setBlockList,
     getBlockI18n,
@@ -762,6 +779,7 @@ export default function () {
     removePropertyLink,
     getBlockProperties,
     getBlockPageSchema,
-    getDateFromNow
+    getDateFromNow,
+    shouldReplaceCategoryWithGroup
   }
 }

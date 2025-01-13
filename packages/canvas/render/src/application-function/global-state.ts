@@ -5,9 +5,6 @@ const Func = Function
 
 export function useGlobalState() {
   const globalState = ref([])
-  const getGlobalState = () => {
-    return globalState.value
-  }
 
   const setGlobalState = (data = []) => {
     globalState.value = data
@@ -28,7 +25,6 @@ export function useGlobalState() {
   })
   return {
     globalState,
-    getGlobalState,
     setGlobalState,
     stores
   }

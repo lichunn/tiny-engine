@@ -5,6 +5,7 @@ import renderer from '../render'
 function defaultRenderer(schema, refreshKey, entry, active, isPage = true) {
   // 渲染画布增加根节点，与出码和预览保持一致
   const rootChildrenSchema = {
+    id: 0,
     componentName: 'div',
     // 手动添加一个唯一的属性，后续在画布选中此节点时方便处理额外的逻辑。由于没有修改schema，不会影响出码
     props: { ...schema.props, 'data-id': 'root-container', 'data-page-active': active },
@@ -24,6 +25,7 @@ function defaultRenderer(schema, refreshKey, entry, active, isPage = true) {
   }
 
   return h(
+    // TODO: 这里顶层的 i18n-host 在不支持 webComponent 的区块之后，应该也不需要webComponent 的 i18n provider 了
     'tiny-i18n-host',
     {
       locale: 'zh_CN',

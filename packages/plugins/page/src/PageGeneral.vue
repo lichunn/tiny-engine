@@ -53,6 +53,10 @@
           </span>
         </div>
       </tiny-form-item>
+
+      <tiny-form-item v-if="pageSettingState.currentPageData.group !== 'publicPages'" prop="isDefault">
+        <tiny-checkbox v-model="pageSettingState.currentPageData.isDefault">设为默认页</tiny-checkbox>
+      </tiny-form-item>
     </tiny-form>
     <page-home
       v-if="!isFolder && !pageSettingState.isNew && pageSettingState.currentPageData.group !== 'public'"
@@ -62,7 +66,7 @@
 
 <script lang="jsx">
 import { ref, computed, watchEffect } from 'vue'
-import { Form, FormItem, Input, Select, Radio } from '@opentiny/vue'
+import { Form, FormItem, Input, Select, Radio, Checkbox } from '@opentiny/vue'
 import { usePage } from '@opentiny/tiny-engine-meta-register'
 import { REGEXP_PAGE_NAME, REGEXP_FOLDER_NAME, REGEXP_ROUTE } from '@opentiny/tiny-engine-common/js/verification'
 import PageHome from './PageHome.vue'
@@ -74,7 +78,8 @@ export default {
     TinyInput: Input,
     TinySelect: Select,
     PageHome,
-    TinyRadio: Radio
+    TinyRadio: Radio,
+    TinyCheckbox: Checkbox
   },
   props: {
     modelValue: {
@@ -161,18 +166,15 @@ export default {
     const pageToTreeData = (page) => {
       const { id, name, isPage, children } = page
 
-      if (!Array.isArray(children)) {
-        return { id, name, isPage }
-      }
+      const result = { id: String(id), name, isPage }
 
-      return {
-        id,
-        name,
-        isPage,
-        children: children
+      if (Array.isArray(children)) {
+        result.children = children
           .filter((page) => page.id !== pageSettingState.currentPageData.id)
           .map((page) => pageToTreeData(page))
       }
+
+      return result
     }
 
     const getNodeIcon = (data) => {
@@ -199,7 +201,7 @@ export default {
           return (
             <>
               {getNodeIcon(data)}
-              <label>{node.label}</label>
+              <div>{node.label}</div>
             </>
           )
         }
@@ -318,9 +320,6 @@ export default {
             padding: 0 12px;
             svg {
               margin-right: 8px;
-            }
-            * {
-              cursor: pointer;
             }
           }
           .tiny-tree-node__label {

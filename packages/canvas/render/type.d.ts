@@ -8,5 +8,7 @@ export declare global {
       scripts: Array<any>
     }
     TinyGlobalConfig: Record<string, any>
+    loadBlockComponent: (blockName: string) => Promise<any>
+    host: any
   }
 }

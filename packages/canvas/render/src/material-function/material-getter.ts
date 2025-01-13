@@ -1,8 +1,14 @@
-import { h } from 'vue'
-import { isHTMLTag, hyphenate } from '@vue/shared'
+import { h, defineAsyncComponent } from 'vue'
+import { isHTMLTag } from '@vue/shared'
 import * as TinyVueIcon from '@opentiny/vue-icon'
-import { utils } from '@opentiny/tiny-engine-utils'
-import { CanvasRow, CanvasCol, CanvasRowColContainer } from '@opentiny/tiny-engine-builtin-component'
+
+import {
+  CanvasRow,
+  CanvasCol,
+  CanvasRowColContainer,
+  CanvasFlexBox,
+  CanvasSection
+} from '@opentiny/tiny-engine-builtin-component'
 import {
   CanvasBox,
   CanvasCollection,
@@ -15,9 +21,8 @@ import {
   CanvasRouterLink
 } from '../builtin'
 import { getController } from '../canvas-function/controller'
-import { generateCollection } from './support-collection'
+import BlockLoadError from '../BlockLoadError.vue'
 
-export const customElements = {}
 export const Mapper = {
   Icon: CanvasIcon,
   Text: CanvasText,
@@ -27,6 +32,8 @@ export const Mapper = {
   slot: CanvasSlot,
   Template: CanvasBox,
   Img: CanvasImg,
+  CanvasSection,
+  CanvasFlexBox,
   CanvasRow,
   CanvasCol,
   CanvasRowColContainer,
@@ -42,91 +49,62 @@ const getBlock = (name) => {
   return window.blocks?.[name]
 }
 
-const { hyphenateRE } = utils
-const getPlainProps = (object: Record<string, any> = {}) => {
-  const { slot, ...rest } = object
-  const props = {}
+const blockComponentsBlobUrlMap = new Map<string, string>()
 
-  if (slot) {
-    rest.slot = slot.name || slot
-  }
-
-  Object.entries(rest).forEach(([key, value]) => {
-    let renderKey = key
-
-    // html 标签属性会忽略大小写，所以传递包含大写的 props 需要转换为 kebab 形式的 props
-    if (!/on[A-Z]/.test(renderKey) && hyphenateRE.test(renderKey)) {
-      renderKey = hyphenate(renderKey)
+// TODO: 这里的全局 getter 方法名，可以做成配置化
+const loadBlockComponent = async (name: string) => {
+  try {
+    if (blockComponentsBlobUrlMap.has(name)) {
+      return import(/* @vite-ignore */ blockComponentsBlobUrlMap.get(name))
     }
 
-    if (['boolean', 'string', 'number'].includes(typeof value)) {
-      props[renderKey] = value
-    } else {
-      // 如果传给webcomponent标签的是对象或者数组需要使用.prop修饰符，转化成h函数就是如下写法
-      props[`.${renderKey}`] = value
-    }
-  })
-  return props
-}
+    const blocksBlob = (await getController().getBlockByName(name)) as Array<{ blobURL: string; style: string }>
 
-const generateBlockContent = (schema) => {
-  if (schema?.componentName === 'Collection') {
-    generateCollection(schema)
-  }
-  if (Array.isArray(schema?.children)) {
-    schema.children.forEach((item) => {
-      generateBlockContent(item)
-    })
-  }
-}
-const registerBlock = (componentName) => {
-  getController()
-    .registerBlock?.(componentName)
-    .then((res) => {
-      const blockSchema = res.content
+    for (const [fileName, value] of Object.entries(blocksBlob)) {
+      blockComponentsBlobUrlMap.set(fileName, value.blobURL)
 
-      // 拿到区块数据，建立区块中数据源的映射关系
-      generateBlockContent(blockSchema)
-
-      // 如果区块的根节点有百分比高度，则需要特殊处理，把高度百分比传递下去,适配大屏应用
-      if (/height:\s*?[\d|.]+?%/.test(blockSchema?.props?.style)) {
-        const blockDoms = document.querySelectorAll<HTMLElement>(hyphenate(componentName))
-        blockDoms.forEach((item) => {
-          item.style.height = '100%'
-        })
+      if (!value.style) {
+        continue
       }
-    })
+
+      // 注册 CSS，以区块为维度
+      const stylesheet = document.querySelector(`#${fileName}`)
+
+      if (stylesheet) {
+        stylesheet.innerHTML = value.style
+      } else {
+        const newStylesheet = document.createElement('style')
+        newStylesheet.innerHTML = value.style
+        newStylesheet.setAttribute('id', fileName)
+        document.head.appendChild(newStylesheet)
+      }
+    }
+
+    return import(/* @vite-ignore */ blockComponentsBlobUrlMap.get(name))
+  } catch (error) {
+    // 加载错误提示
+    return h(BlockLoadError, { name })
+  }
 }
 
-export const wrapCustomElement = (componentName) => {
-  const material = getController().getMaterial(componentName)
+window.loadBlockComponent = loadBlockComponent
 
-  if (!Object.keys(material).length) {
-    registerBlock(componentName)
-  }
+const getBlockComponent = (name) => {
+  return defineAsyncComponent(() => loadBlockComponent(name))
+}
 
-  customElements[componentName] = {
-    name: componentName + '.ce',
-    render() {
-      return h(
-        hyphenate(componentName),
-        window.parent.TinyGlobalConfig.dslMode === 'Vue' ? getPlainProps(this.$attrs) : this.$attrs,
-        this.$slots.default?.()
-      )
-    }
-  }
+// 移除区块缓存
+export const removeBlockCompsCache = () => {
+  blockComponentsBlobUrlMap.forEach((_, fileName) => {
+    const stylesheet = document.querySelector(`#${fileName}`)
+    stylesheet?.remove?.()
+  })
 
-  return customElements[componentName]
+  blockComponentsBlobUrlMap.clear()
 }
 
 export const getIcon = (name) => TinyVueIcon?.[name]?.() || ''
 
 export const getComponent = (name) => {
-  return (
-    Mapper[name] ||
-    getNative(name) ||
-    getBlock(name) ||
-    customElements[name] ||
-    (isHTMLTag(name) ? name : wrapCustomElement(name))
-  )
+  return Mapper[name] || getNative(name) || getBlock(name) || (isHTMLTag(name) ? name : getBlockComponent(name))
 }

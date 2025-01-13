@@ -1,5 +1,8 @@
 <template>
   <component :is="CanvasLayout">
+    <template #header>
+      <component v-if="!isBlock()" :is="CanvasRouteBar"></component>
+    </template>
     <template #container>
       <component
         :is="CanvasContainer.entry"
@@ -9,7 +12,8 @@
         :canvas-src-doc="canvasSrcDoc"
         @remove="removeNode"
         @selected="nodeSelected"
-      ></component>
+      >
+      </component>
     </template>
     <template #footer>
       <component :is="CanvasBreadcrumb" :data="footData"></component>
@@ -33,7 +37,8 @@ import {
   getOptions,
   getMetaApi,
   META_SERVICE,
-  META_APP
+  META_APP,
+  useNotify
 } from '@opentiny/tiny-engine-meta-register'
 import { constants } from '@opentiny/tiny-engine-utils'
 import * as ast from '@opentiny/tiny-engine-common/js/ast'
@@ -52,7 +57,7 @@ export default {
   setup() {
     const registry = getMergeRegistry('canvas')
     const materialsPanel = getMergeMeta('engine.plugins.materials')?.entry
-    const { CanvasBreadcrumb } = registry.components
+    const { CanvasRouteBar, CanvasBreadcrumb } = registry.components
     const CanvasLayout = registry.layout.entry
     const [CanvasContainer] = registry.metas
     const footData = ref([])
@@ -69,10 +74,12 @@ export default {
 
     const removeNode = (node) => {
       const { pageState } = useCanvas()
-      footData.value = useCanvas().canvasApi.value.getNodePath(node?.id)
+      footData.value = useCanvas().getNodePath(node?.id)
       pageState.currentSchema = {}
       pageState.properties = null
     }
+
+    const isBlock = useCanvas().isBlock
 
     watch(
       [() => useCanvas().isSaved(), () => useLayout().layoutState.pageStatus, () => useCanvas().getPageSchema()],
@@ -97,10 +104,11 @@ export default {
         // 1. 页面或区块状态是未保存状态（尝试编辑）
         // 2. 页面刷新或第一次进入页面(含从别的页面或区块切换到别的页面或区块)
         // 3. 页面上已经有弹窗，不允许重复弹窗
+        // 4. 当前历史堆栈为0，且当前未保存状态和上一次未保存状态不一致，不重复弹窗
 
         const showConfirm = !isSaved || pageSchema !== oldPageSchema
 
-        if (!showConfirm || showModal) {
+        if (!showConfirm || showModal || (useHistory().historyState?.index === 0 && isSaved !== oldIsSaved)) {
           return
         }
 
@@ -124,7 +132,6 @@ export default {
         useModal().confirm({
           title: '提示',
           message: renderMsg,
-          status: 'info',
           exec: callback,
           cancel: callback,
           hide: () => {
@@ -134,19 +141,21 @@ export default {
       }
     )
 
-    const nodeSelected = (node, parent, type) => {
+    const nodeSelected = (node, parent, type, id) => {
       const { toolbars } = useLayout().layoutState
       if (type !== 'clickTree') {
         useLayout().closePlugin()
       }
 
-      const { getSchema, getNodePath } = useCanvas().canvasApi.value
+      const { getSchema, getNodePath } = useCanvas()
+      const schemaItem = useCanvas().getNodeById(id)
 
-      const schema = getSchema()
+      const pageSchema = getSchema()
+
       // 如果选中的节点是画布，就设置成默认选中最外层schema
-      useProperties().getProps(node || schema, parent)
-      useCanvas().setCurrentSchema(node || schema)
-      footData.value = getNodePath(node?.id)
+      useProperties().getProps(schemaItem || pageSchema, parent)
+      useCanvas().setCurrentSchema(schemaItem || pageSchema)
+      footData.value = getNodePath(schemaItem?.id)
       toolbars.visiblePopover = false
     }
 
@@ -201,6 +210,29 @@ export default {
       }
     })()
 
+    // TODO: 待挪到 getBaseInfo
+    const baseInfoKeys = Object.keys(getMetaApi(META_SERVICE.GlobalService).getBaseInfo())
+    function replaceKey(key) {
+      const existingKey = baseInfoKeys.find((eKey) => eKey.toLowerCase() === key.toLowerCase())
+      if (existingKey) {
+        return existingKey
+      }
+      return key
+    }
+    const postUrlChanged = () => {
+      usePage().postLocationHistoryChanged(
+        Object.fromEntries(
+          Array.from(new URLSearchParams(window.location.search)).map(([key, value]) => [replaceKey(key), value])
+        )
+      )
+    }
+    onMounted(() => {
+      window.addEventListener('popstate', postUrlChanged)
+    })
+    onUnmounted(() => {
+      window.removeEventListener('popstate', postUrlChanged)
+    })
+
     return {
       removeNode,
       canvasSrc,
@@ -213,17 +245,22 @@ export default {
         // 需要在canvas/render或内置组件里使用的方法
         getMaterial: useMaterial().getMaterial,
         addHistory: useHistory().addHistory,
-        registerBlock: useMaterial().registerBlock,
         request: getMetaApi(META_SERVICE.Http).getHttp(),
         getPageById: getMetaApi(META_APP.AppManage).getPageById,
         getPageAncestors: usePage().getAncestors,
         getBaseInfo: () => getMetaApi(META_SERVICE.GlobalService).getBaseInfo(),
         addHistoryDataChangedCallback,
-        ast
+        ast,
+        getBlockByName: useMaterial().getBlockByName,
+        useModal,
+        useMessage,
+        useNotify
       },
+      isBlock,
       CanvasLayout,
       canvasRef,
       CanvasContainer,
+      CanvasRouteBar,
       CanvasBreadcrumb
     }
   }

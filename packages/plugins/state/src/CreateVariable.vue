@@ -53,13 +53,13 @@
             <template #fullscreenFooter>
               <div class="fullscreen-footer-content">
                 <div class="tips">
-                  <pre><code>{{ getterExample }}</code></pre>
+                  <pre>{{ getterExample }}</pre>
                 </div>
               </div>
             </template>
           </monaco-editor>
           <div class="tips">
-            <pre><code>{{ getterExample }}</code></pre>
+            <pre>{{ getterExample }}</pre>
           </div>
         </tiny-form-item>
       </tiny-collapse-item>
@@ -72,13 +72,13 @@
             <template #fullscreenFooter>
               <div class="fullscreen-footer-content">
                 <div class="tips">
-                  <pre><code>{{ setterExample }}</code></pre>
+                  <pre>{{ setterExample }}</pre>
                 </div>
               </div>
             </template>
           </monaco-editor>
           <div class="tips">
-            <pre><code>{{ setterExample }}</code></pre>
+            <pre>{{ setterExample }}</pre>
           </div>
         </tiny-form-item>
       </tiny-collapse-item>
@@ -409,18 +409,21 @@ export default {
   height: calc(100% - 45px);
   overflow-y: auto;
   .tips {
-    font-size: 11px;
+    font-size: 12px;
     line-height: 18px;
     margin-top: 8px;
     border-radius: 4px;
     padding: 8px 14px;
-    background: var(--ti-lowcode-data-source-box-bg);
-    color: var(--ti-lowcode-datasource-tip-color);
+    background: var(--te-common-bg-container);
+    color: var(--te-common-text-weaken);
+    & > pre {
+      font-family: Consolas, 'Courier New', monospace;
+    }
   }
   :deep(.toolbar) {
     position: absolute;
     z-index: 99;
-    right: 20px;
+    right: 12px;
   }
   .var {
     padding: 12px 12px 0 12px;

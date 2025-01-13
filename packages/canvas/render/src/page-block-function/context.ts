@@ -11,7 +11,6 @@
  */
 
 import { shallowReactive } from 'vue'
-import { utils } from '@opentiny/tiny-engine-utils'
 
 export function useContext() {
   const context = shallowReactive({})
@@ -26,38 +25,6 @@ export function useContext() {
     context,
     setContext,
     getContext
-  }
-}
-
-export function useNodes() {
-  const nodes = {}
-
-  const setNode = (schema, parent) => {
-    schema.id = schema.id || utils.guid()
-    nodes[schema.id] = { node: schema, parent }
-  }
-
-  const getNode = (id, parent) => {
-    return parent ? nodes[id] : nodes[id].node
-  }
-
-  const delNode = (id) => delete nodes[id]
-
-  const clearNodes = () => {
-    Object.keys(nodes).forEach(delNode)
-  }
-  const getRoot = (id) => {
-    const { parent } = getNode(id, true)
-
-    return parent?.id ? getRoot(parent.id) : parent
-  }
-
-  return {
-    setNode,
-    getNode,
-    delNode,
-    clearNodes,
-    getRoot
   }
 }
 
@@ -107,13 +74,11 @@ export function useCssScopeId() {
 }
 export function usePageContext() {
   const contextExpose = useContext()
-  const nodeExpose = useNodes()
   const conditionExpose = useCondition()
   const contextParentExpose = usePageContextParent()
   const cssCopeIdExpose = useCssScopeId()
   return {
     ...contextExpose,
-    ...nodeExpose,
     ...conditionExpose,
     ...contextParentExpose,
     ...cssCopeIdExpose,

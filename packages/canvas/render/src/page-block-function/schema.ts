@@ -1,4 +1,4 @@
-import { reactive, watchEffect } from 'vue'
+import { reactive, watchEffect, watch } from 'vue'
 import { reset } from '../data-utils'
 import { useAccessorMap } from './accessor-map'
 import { useState } from './state'
@@ -6,30 +6,50 @@ import { useProps } from './props'
 import { useMethods } from './methods'
 import { nextTick } from 'vue'
 import { globalNotify } from '../canvas-function'
-import { setPagecss } from './css'
+import { setPageCss } from './css'
 import type { IPageSchema, ISchemaChildrenItem } from '@opentiny/tiny-engine-dsl-vue'
 export { IPageSchema, ISchemaChildrenItem }
 
 export function useSchema(
-  { context: globalContext, setContext, getContext, clearNodes, getNode },
+  { context: globalContext, setContext, getContext },
   { utils, bridge, stores, getDataSourceMap }
 ) {
   const schema = reactive<Partial<IPageSchema>>({})
   const { generateAccessor, stateAccessorMap, propsAccessorMap, generateStateAccessors } = useAccessorMap(globalContext)
 
-  const { state, getState, setState, deleteState } = useState(schema, {
+  const { state, setState } = useState(schema, {
     getContext,
     generateStateAccessors
   })
 
-  const { props, initProps, getProps, setProps } = useProps(generateAccessor)
+  const { props, initProps, setProps } = useProps(generateAccessor)
 
   const { methods, getMethods, setMethods } = useMethods({
     setContext,
     getContext
   })
 
-  const getSchema = () => schema
+  watch(
+    () => schema.state,
+    (value) => {
+      setState(value)
+    },
+    {
+      deep: true
+    }
+  )
+
+  // 这里监听schema.methods，为了保证methods上下文环境始终为最新
+  watch(
+    () => schema.methods,
+    (value) => {
+      setMethods(value, true)
+    },
+    {
+      deep: true
+    }
+  )
+
   const setSchema = async (data: IPageSchema, pageId?: string) => {
     const newSchema = JSON.parse(JSON.stringify(data || schema))
     reset(schema)
@@ -71,9 +91,9 @@ export function useSchema(
 
     // 这里setState（会触发画布渲染），是因为状态管理里面的变量会用到props、utils、bridge、stores、methods
     setState(newSchema.state, true)
-    clearNodes()
+
     await nextTick()
-    setPagecss(data.css, pageId)
+    setPageCss(data.css, pageId)
     Object.assign(schema, newSchema)
 
     // 当上下文环境设置完成之后再去处理区块属性访问器的watchEffect
@@ -99,7 +119,6 @@ export function useSchema(
   }
   return {
     schema,
-    getSchema,
     setSchema,
     ...{
       generateAccessor,
@@ -109,14 +128,11 @@ export function useSchema(
     },
     ...{
       state,
-      getState,
-      setState,
-      deleteState
+      setState
     },
     ...{
       props,
       initProps,
-      getProps,
       setProps
     },
     ...{
@@ -125,9 +141,8 @@ export function useSchema(
       setMethods
     },
     ...{
-      getContext,
-      getNode
+      getContext
     },
-    setPagecss
+    setPageCss
   }
 }

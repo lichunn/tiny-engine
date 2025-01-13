@@ -17,9 +17,11 @@ import {
   copyObject,
   NODE_UID,
   NODE_TAG,
-  NODE_LOOP
+  NODE_LOOP,
+  NODE_INACTIVE_UID
 } from '../../common'
-import { useCanvas, useLayout, useResource, useTranslate, useMaterial } from '@opentiny/tiny-engine-meta-register'
+import { useCanvas, useLayout, useTranslate, useMaterial } from '@opentiny/tiny-engine-meta-register'
+import { utils } from '@opentiny/tiny-engine-utils'
 import { isVsCodeEnv } from '@opentiny/tiny-engine-common/js/environments'
 import Builtin from '../../render/src/builtin/builtin.json' //TODO 画布内外应该分开
 
@@ -72,15 +74,7 @@ export const getDesignMode = () => getRenderer()?.getDesignMode()
 
 export const setDesignMode = (mode) => getRenderer()?.setDesignMode(mode)
 
-export const getGlobalState = () => getRenderer().getGlobalState()
-
-export const getNode = (id, parent) => getRenderer()?.getNode(id, parent)
-
-export const getSchema = () => getRenderer()?.getSchema()
-
-export const getContext = () => {
-  return getRenderer().getContext()
-}
+export const getSchema = () => useCanvas().getPageSchema()
 
 // 记录拖拽状态
 export const dragState = reactive({
@@ -119,6 +113,10 @@ export const hoverState = reactive({
   ...initialRectState
 })
 
+export const inactiveHoverState = reactive({
+  ...initialRectState
+})
+
 // 拖拽时的位置状态
 export const lineState = reactive({
   ...initialLineState
@@ -126,6 +124,7 @@ export const lineState = reactive({
 
 export const clearHover = () => {
   Object.assign(hoverState, initialRectState, { slot: null })
+  Object.assign(inactiveHoverState, initialRectState, { slot: null })
 }
 
 export const clearSelect = () => {
@@ -233,6 +232,28 @@ export const getElement = (element) => {
   return undefined
 }
 
+export const getInactiveElement = (element) => {
+  if (
+    !element ||
+    element.nodeType !== 1 ||
+    // 如果当前元素是body或者html，需要排除
+    element === element.ownerDocument.body ||
+    element === element.ownerDocument.documentElement ||
+    // 如果当前元素是RouterView, 则有可能是激活元素处于非激活元素里面，需要排除
+    element.getAttribute(NODE_TAG) === 'RouterView'
+  ) {
+    return undefined
+  }
+
+  if (element.getAttribute(NODE_INACTIVE_UID)) {
+    return element
+  } else if (element.parentElement) {
+    return getInactiveElement(element.parentElement)
+  }
+
+  return undefined
+}
+
 const getRect = (element) => {
   if (element === getDocument().body) {
     const { innerWidth: width, innerHeight: height } = getWindow()
@@ -251,48 +272,51 @@ const getRect = (element) => {
 }
 
 const inserAfter = ({ parent, node, data }) => {
-  const parentChildren = parent.children
-  const index = parentChildren.indexOf(node)
-  parent.children.splice(index + 1, 0, data)
+  if (!data.id) {
+    data.id = utils.guid()
+  }
+
+  useCanvas().operateNode({
+    type: 'insert',
+    parentId: parent.id,
+    newNodeData: data,
+    position: 'after',
+    referTargetNodeId: node.id
+  })
 }
 
 const insertBefore = ({ parent, node, data }) => {
-  const parentChildren = parent.children
-  const index = parentChildren.indexOf(node)
-  parent.children.splice(index, 0, data)
+  if (!data.id) {
+    data.id = utils.guid()
+  }
+
+  useCanvas().operateNode({
+    type: 'insert',
+    parentId: parent.id,
+    newNodeData: data,
+    position: 'before',
+    referTargetNodeId: node.id
+  })
 }
 
 const insertInner = ({ node, data }, position) => {
-  node.children = node.children || []
-
-  if (position === POSITION.TOP || position === POSITION.LEFT) {
-    node.children.unshift(data)
-  } else {
-    node.children.push(data)
+  if (!data.id) {
+    data.id = utils.guid()
   }
+
+  useCanvas().operateNode({
+    type: 'insert',
+    parentId: node.id,
+    newNodeData: data,
+    position: [POSITION.TOP, POSITION.LEFT].includes(position) ? 'before' : 'after'
+  })
 }
 
-export const removeNode = ({ parent, node }) => {
-  const parentChildren = parent.children || parent.value
-  const index = parentChildren.indexOf(node)
-
-  if (index > -1) {
-    parentChildren.splice(index, 1)
-  } else {
-    const templates = parentChildren.filter(({ componentName }) => componentName === 'Template')
-
-    templates.forEach((template) => {
-      const { children } = template
-
-      if (children.length) {
-        children.splice(children.indexOf(node), 1)
-      }
-
-      if (!children.length) {
-        parentChildren.splice(parentChildren.indexOf(template), 1)
-      }
-    })
-  }
+export const removeNode = (id) => {
+  useCanvas().operateNode({
+    type: 'delete',
+    id
+  })
 }
 
 export const removeNodeById = (id) => {
@@ -300,7 +324,7 @@ export const removeNodeById = (id) => {
     return
   }
 
-  removeNode(getNode(id, true))
+  removeNode(id)
   clearSelect()
   getController().addHistory()
   canvasState.emit('remove')
@@ -426,13 +450,13 @@ const isAncestor = (ancestor, descendant) => {
   let descendantId = typeof descendant === 'string' ? descendant : descendant.id
 
   while (descendantId) {
-    const { parent } = getNode(descendantId, true) || {}
+    const { parent } = useCanvas().getNodeWithParentById(descendantId) || {}
 
-    if (parent.id === ancestorId) {
+    if (parent?.id === ancestorId) {
       return true
     }
 
-    descendantId = parent.id
+    descendantId = parent?.id
   }
 
   return false
@@ -484,6 +508,7 @@ const setHoverRect = (element, data) => {
   const configure = getConfigure(componentName)
   const rect = getRect(element)
   const { left, height, top, width } = rect
+  const { getSchema, getNodeWithParentById } = useCanvas()
 
   hoverState.configure = configure
 
@@ -495,7 +520,7 @@ const setHoverRect = (element, data) => {
 
     // 如果拖拽经过的元素是body或者是带有容器属性的盒子，并且在元素内部插入,则需要特殊处理
     if ((isBodyEl(element) || configure?.isContainer) && rectType === POSITION.IN) {
-      const { node } = isBodyEl(element) ? { node: getSchema() } : getNode(id, true) || {}
+      const { node } = isBodyEl(element) ? { node: getSchema() } : getNodeWithParentById(id) || {}
       const children = node?.children || []
       if (children.length > 0) {
         // 如果容器盒子有子节点，则以最后一个子节点为拖拽参照物
@@ -542,11 +567,36 @@ const setHoverRect = (element, data) => {
     height,
     top,
     left,
+    element,
     componentName
   })
   return undefined
 }
 
+const setInactiveHoverRect = (element) => {
+  if (!element) {
+    Object.assign(inactiveHoverState, initialRectState, { slot: null })
+    return
+  }
+
+  const componentName = element.getAttribute(NODE_TAG)
+  const id = element.getAttribute(NODE_INACTIVE_UID)
+  const configure = getConfigure(componentName)
+  const rect = getRect(element)
+  const { left, height, top, width } = rect
+
+  inactiveHoverState.configure = configure
+  // 设置元素hover状态
+  Object.assign(inactiveHoverState, {
+    id,
+    width,
+    height,
+    top,
+    left,
+    element,
+    componentName
+  })
+}
 let moveUpdateTimer = null
 
 // 绝对布局
@@ -628,7 +678,7 @@ export const dragMove = (event, isHover) => {
   if (isHover) {
     lineState.position = ''
     setHoverRect(getElement(event.target), null)
-
+    setInactiveHoverRect(getInactiveElement(event.target))
     return
   }
 
@@ -649,10 +699,12 @@ export const selectNode = async (id, type) => {
     const loopId = type.split('=')[1]
     canvasState.loopId = loopId
   }
-  const { node, parent } = getNode(id, true) || {}
+
+  const { node, parent } = useCanvas().getNodeWithParentById(id) || {}
+
   let element = querySelectById(id, type)
 
-  if (element) {
+  if (element && node) {
     const { rootSelector } = getConfigure(node.componentName)
     element = rootSelector ? element.querySelector(rootSelector) : element
   }
@@ -662,7 +714,7 @@ export const selectNode = async (id, type) => {
 
   await scrollToNode(element)
   setSelectRect(element)
-  canvasState.emit('selected', node, parent, type)
+  canvasState.emit('selected', node, parent, type, id)
 
   return node
 }
@@ -674,7 +726,7 @@ export const hoverNode = (id, data) => {
 
 export const insertNode = (node, position = POSITION.IN, select = true) => {
   if (!node.parent) {
-    insertInner({ node: canvasState.schema, data: node.data }, position)
+    insertInner({ node: useCanvas().pageState.pageSchema, data: node.data }, position)
   } else {
     switch (position) {
       case POSITION.TOP:
@@ -709,7 +761,8 @@ export const copyNode = (id) => {
   if (!id) {
     return
   }
-  const { node, parent } = getNode(id, true)
+
+  const { node, parent } = useCanvas().getNodeWithParentById(id)
 
   inserAfter({ parent, node, data: copyObject(node) })
   getController().addHistory()
@@ -721,15 +774,18 @@ export const onMouseUp = () => {
   const absolute = canvasState.type === 'absolute'
   const sourceId = data?.id
   const lineId = lineState.id
+  const { getNodeWithParentById, getSchema } = useCanvas()
 
   if (draging && !forbidden) {
-    const { parent, node } = getNode(lineId, true) || {} // target
-    const targetNode = { parent, node, data: toRaw(data) }
+    const { parent, node } = getNodeWithParentById(lineId) || {} // target
+
+    const insertData = toRaw(data)
+    const targetNode = { parent, node, data: { ...insertData, children: insertData.children || [] } }
 
     if (sourceId) {
       // 内部拖拽
       if (sourceId !== lineId && !absolute) {
-        removeNode(getNode(sourceId, true))
+        removeNode(sourceId)
         insertNode(targetNode, position)
       }
     } else {
@@ -746,26 +802,6 @@ export const onMouseUp = () => {
 
   // 重置拖拽状态
   dragEnd()
-}
-
-export const setPageCss = (css = '') => {
-  const id = 'page-css'
-  const document = getDocument()
-  let element = document.getElementById(id)
-  const head = document.querySelector('head')
-
-  document.body.setAttribute('style', '')
-
-  if (!element) {
-    element = document.createElement('style')
-    element.setAttribute('type', 'text/css')
-    element.setAttribute('id', id)
-
-    element.innerHTML = css
-    head.appendChild(element)
-  } else {
-    element.innerHTML = css
-  }
 }
 
 export const addStyle = (href) => appendStyle(href, getDocument())
@@ -786,58 +822,9 @@ export const setLocales = (messages, merge) => {
   })
 }
 
-export const setState = (state) => {
-  getRenderer().setState(state)
-}
-
-export const setUtils = (utils, clear, isForceRefresh) => {
-  getRenderer().setUtils(utils, clear, isForceRefresh)
-}
-
-export const updateUtils = (utils) => {
-  getRenderer().updateUtils(utils)
-}
-
-export const deleteUtils = (utils) => {
-  getRenderer().deleteUtils(utils)
-}
-
-export const deleteState = (variable) => {
-  getRenderer().deleteState(variable)
-}
-
-export const setGlobalState = (state) => {
-  useResource().resState.globalState = state
-  getRenderer().setGlobalState(state)
-}
-
-export const getNodePath = (id, nodes = []) => {
-  const { parent, node } = getNode(id, true) || {}
-
-  node && nodes.unshift({ name: node.componentName, node: id })
-
-  if (parent) {
-    parent && getNodePath(parent.id, nodes)
-  } else {
-    nodes.unshift({ name: 'BODY', node: id })
-  }
-
-  return nodes
-}
-
-export const setSchema = async (schema) => {
-  clearHover()
-  clearSelect()
-  canvasState.schema = await getRenderer()?.setSchema(schema)
-
-  return canvasState.schema
-}
-
 export const setConfigure = (configure) => {
   getRenderer().setConfigure(configure)
 }
-
-export const setProps = (data) => getRenderer()?.setProps(data)
 
 export const setI18n = (data) => {
   const messages = data || useTranslate().getData()
@@ -868,12 +855,8 @@ export const canvasDispatch = (name, data, doc = getDocument()) => {
 export const canvasApi = {
   dragStart,
   updateRect,
-  getContext,
-  getNodePath,
   dragMove,
   setLocales,
-  setState,
-  deleteState,
   getRenderer,
   clearSelect,
   selectNode,
@@ -881,41 +864,26 @@ export const canvasApi = {
   insertNode,
   removeNode,
   addComponent,
-  setPageCss,
   addScript,
   addStyle,
-  getNode,
   getCurrent,
-  setSchema,
-  setUtils,
-  updateUtils,
-  deleteUtils,
-  getSchema,
   setI18n,
   getCanvasType,
   setCanvasType,
-  setProps,
-  setGlobalState,
-  getGlobalState,
   getDesignMode,
   setDesignMode,
   getDocument,
   canvasDispatch,
   Builtin,
-  setDataSourceMap: (...args) => {
-    return canvasState.renderer.setDataSourceMap(...args)
+  removeBlockCompsCache: (...args) => {
+    return canvasState.renderer.removeBlockCompsCache(...args)
   },
-  getDataSourceMap: (...args) => {
-    return canvasState.renderer.getDataSourceMap(...args)
+  updateCanvas: (...args) => {
+    return canvasState.renderer.updateCanvas(...args)
   }
 }
 
 export const initCanvas = ({ renderer, iframe, emit, controller }) => {
-  const currentSchema = getSchema()
-
-  // 在点击刷新按钮的情况下继续保留最新的schema.json
-  const schema = currentSchema ? currentSchema : useCanvas().getPageSchema()
-
   canvasState.iframe = iframe
   canvasState.emit = emit
   // 存放画布外层传进来的插件api
@@ -930,11 +898,6 @@ export const initCanvas = ({ renderer, iframe, emit, controller }) => {
     senterMessage({ type: 'i18nReady', value: true }, '*')
   }
 
-  setGlobalState(useResource().resState.globalState)
-  renderer.setDataSourceMap(useResource().resState.dataSource)
-  // 设置画布全局的utils工具类上下文环境
-  setUtils(useResource().resState.utils)
-  setSchema(schema)
   setConfigure(useMaterial().getConfigureMap())
   canvasDispatch('updateDependencies', { detail: useMaterial().materialState.thirdPartyDeps })
   canvasState.loading = false

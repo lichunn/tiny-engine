@@ -36,6 +36,7 @@ const getDevAlias = (useSourceAlias) => {
     '@opentiny/tiny-engine-toolbar-breadcrumb': path.resolve(basePath, 'packages/toolbars/breadcrumb/index.js'),
     '@opentiny/tiny-engine-toolbar-fullscreen': path.resolve(basePath, 'packages/toolbars/fullscreen/index.js'),
     '@opentiny/tiny-engine-toolbar-lang': path.resolve(basePath, 'packages/toolbars/lang/index.js'),
+    '@opentiny/tiny-engine-toolbar-view-setting': path.resolve(basePath, 'packages/toolbars/view-setting/index.js'),
     '@opentiny/tiny-engine-toolbar-layout': path.resolve(basePath, 'packages/toolbars/layout/index.js'),
     '@opentiny/tiny-engine-toolbar-lock': path.resolve(basePath, 'packages/toolbars/lock/index.js'),
     '@opentiny/tiny-engine-toolbar-logo': path.resolve(basePath, 'packages/toolbars/logo/index.js'),
@@ -61,7 +62,8 @@ const getDevAlias = (useSourceAlias) => {
     '@opentiny/tiny-engine-builtin-component': path.resolve(basePath, 'packages/builtinComponent/index.js'),
     '@opentiny/tiny-engine-meta-register': path.resolve(basePath, 'packages/register/src/index.js'),
     '@opentiny/tiny-engine-layout': path.resolve(basePath, 'packages/layout/index.js'),
-    '@opentiny/tiny-engine-configurator': path.resolve(basePath, 'packages/configurator/src/index.js')
+    '@opentiny/tiny-engine-configurator': path.resolve(basePath, 'packages/configurator/src/index.js'),
+    '@opentiny/tiny-engine-block-compiler': path.resolve(basePath, 'packages/block-compiler/src/index.ts')
   }
 }
 

@@ -15,7 +15,6 @@ import { addScript, addStyle, dynamicImportComponents, updateDependencies } from
 import TinyI18nHost, { I18nInjectionKey } from '@opentiny/tiny-engine-common/js/i18n'
 import Main, { api } from './RenderMain'
 import lowcode from './lowcode'
-import { supportUmdBlock } from './supportUmdBlock'
 
 type ITinyI18nHostI18nHost = typeof TinyI18nHost
 interface IExtendsTinyI18nHost extends ITinyI18nHostI18nHost {
@@ -32,8 +31,6 @@ const initRenderContext = () => {
 
   window.TinyLowcodeComponent = {}
   window.TinyComponentLibs = {}
-
-  supportUmdBlock()
 
   document.addEventListener('updateDependencies', updateDependencies)
 }

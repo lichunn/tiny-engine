@@ -10,3 +10,10 @@ export const newFn = (...argv) => {
   const Fn = Function
   return new Fn(...argv)
 }
+
+export const getDeletedKeys = (objA, objB) => {
+  const keyA = Object.keys(objA)
+  const keyB = new Set(Object.keys(objB))
+
+  return keyA.filter((item) => !keyB.has(item))
+}

@@ -1,20 +1,21 @@
 import { shallowReactive } from 'vue'
 
-import { reset } from '../data-utils'
+import { getDeletedKeys } from '../data-utils'
 import { isStateAccessor, parseData } from '../data-function'
 
 export function useState(schema, { getContext, generateStateAccessors }) {
   const state = shallowReactive({})
-  const getState = () => state
-
-  const deleteState = (variable: string) => {
-    delete state[variable]
-  }
 
   const setState = (data, clear = false) => {
-    clear && reset(state)
-    if (!schema.state) {
-      schema.state = data
+    if (typeof data !== 'object' || data === null) {
+      return
+    }
+
+    const deletedKeys = getDeletedKeys(state, data)
+
+    // 同步删除的 key
+    for (const key of deletedKeys) {
+      delete state[key]
     }
 
     Object.assign(state, parseData(data, {}, getContext()) || {})
@@ -35,8 +36,6 @@ export function useState(schema, { getContext, generateStateAccessors }) {
   }
   return {
     state,
-    getState,
-    setState,
-    deleteState
+    setState
   }
 }

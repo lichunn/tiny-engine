@@ -18,10 +18,20 @@ export function useUtils(context: Record<string, any>) {
   const utils: Record<string, Function | any> = {}
   const getUtils = () => utils
 
-  const setUtils = (data: Array<IUtil>, clear = false, isForceRefresh = false) => {
-    if (clear) {
-      reset(utils)
+  const setUtils = (data: Array<IUtil>) => {
+    if (!Array.isArray(data)) {
+      return
     }
+
+    // 筛选出来已经被删除的 key
+    const newKeys = new Set(data.map(({ name }) => name))
+    const currentKeys = Object.keys(utils)
+    const deletedUtilsKeys = currentKeys.filter((item) => !newKeys.has(item))
+
+    for (const key of deletedUtilsKeys) {
+      delete utils[key]
+    }
+
     const utilsCollection = {}
     // 目前画布还不具备远程加载utils工具类的功能，目前只能加载TinyVue组件库中的组件工具
     data?.forEach((item) => {
@@ -44,31 +54,13 @@ export function useUtils(context: Record<string, any>) {
     })
     Object.assign(utils, utilsCollection)
 
-    // 因为工具类并不具有响应式行为，所以需要通过修改key来强制刷新画布
-    if (isForceRefresh) {
-      refreshKey.value++
-    }
-  }
-
-  const updateUtils = (data: Array<IUtil>) => {
-    setUtils(data, false, true)
-  }
-
-  const deleteUtils = (data: Array<IUtil>) => {
-    data?.forEach((item) => {
-      if (utils[item.name]) {
-        delete utils[item.name]
-      }
-    })
-    setUtils([], false, true)
+    refreshKey.value++
   }
 
   return {
     refreshKey,
     utils,
     getUtils,
-    setUtils,
-    updateUtils,
-    deleteUtils
+    setUtils
   }
 }

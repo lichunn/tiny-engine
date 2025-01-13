@@ -10,13 +10,19 @@
  *
  */
 
-import { defineComponent, h, inject, provide, Ref } from 'vue'
+import { defineComponent, h, inject, provide, Ref, Suspense } from 'vue'
 
-import { NODE_UID as DESIGN_UIDKEY, NODE_TAG as DESIGN_TAGKEY, NODE_LOOP as DESIGN_LOOPID } from '../../common'
+import {
+  NODE_UID as DESIGN_UIDKEY,
+  NODE_TAG as DESIGN_TAGKEY,
+  NODE_LOOP as DESIGN_LOOPID,
+  NODE_INACTIVE_UID
+} from '../../common'
 import { getDesignMode, DESIGN_MODE } from './canvas-function'
 import { parseCondition, parseData, parseLoopArgs } from './data-function'
-import { blockSlotDataMap, getComponent, generateCollection, Mapper, configure } from './material-function'
+import { blockSlotDataMap, getComponent, Mapper, configure } from './material-function'
 import { getPage } from './material-function/page-getter'
+import BlockLoading from './BlockLoading.vue'
 
 export const renderDefault = (children, scope, parent) =>
   children.map?.((child) =>
@@ -34,7 +40,7 @@ const stopEvent = (event) => {
   return false
 }
 
-const generateSlotGroup = (children, isCustomElm, schema) => {
+const generateSlotGroup = (children, schema) => {
   const slotGroup = {}
 
   children.forEach((child) => {
@@ -42,7 +48,6 @@ const generateSlotGroup = (children, isCustomElm, schema) => {
     const slot = child.slot || props?.slot?.name || props?.slot || 'default'
     const isNotEmptyTemplate = componentName === 'Template' && children.length
 
-    isCustomElm && (child.props.slot = 'slot') // CE下需要给子节点加上slot标识
     slotGroup[slot] = slotGroup[slot] || {
       value: [],
       params,
@@ -55,9 +60,9 @@ const generateSlotGroup = (children, isCustomElm, schema) => {
   return slotGroup
 }
 
-const renderSlot = (children, scope, schema, isCustomElm?) => {
+const renderSlot = (children, scope, schema) => {
   if (children.some((a) => a.componentName === 'Template')) {
-    const slotGroup = generateSlotGroup(children, isCustomElm, schema)
+    const slotGroup = generateSlotGroup(children, schema)
     const slots = {}
 
     Object.keys(slotGroup).forEach((slotName) => {
@@ -88,7 +93,7 @@ const getBindProps = (schema, scope, context, pageContext) => {
   const bindProps = {
     ...parseData(schema.props, scope, context),
     ...(cssScopeId ? { [cssScopeId]: '' } : {}),
-    ...(active ? { [DESIGN_UIDKEY]: id } : {}),
+    ...(active ? { [DESIGN_UIDKEY]: id } : { [NODE_INACTIVE_UID]: id }),
     [DESIGN_TAGKEY]: componentName
   }
 
@@ -150,7 +155,7 @@ const injectPlaceHolder = (componentName, children) => {
   return children
 }
 
-const renderGroup = (children, scope, parent, pageContext) => {
+const renderGroup = (children, scope, pageContext) => {
   return children.map?.((schema) => {
     const { componentName, children, loop, loopArgs, condition, id } = schema
     const loopList = parseData(loop, scope, pageContext.context)
@@ -162,8 +167,6 @@ const renderGroup = (children, scope, parent, pageContext) => {
         item,
         loopArgs
       })
-
-      pageContext.setNode(schema, parent)
 
       if (pageContext.conditions[id] === false || !parseCondition(condition, mergeScope, pageContext.context)) {
         return null
@@ -190,20 +193,22 @@ const getChildren = (schema, mergeScope, pageContext) => {
 
   const component = getComponent(componentName)
   const isNative = typeof component === 'string'
-  const isCustomElm = customElements[componentName]
   const isGroup = checkGroup(componentName)
 
   if (Array.isArray(renderChildren)) {
-    if (isNative || isCustomElm) {
-      return renderDefault(renderChildren, mergeScope, schema)
-    } else {
-      return isGroup
-        ? renderGroup(renderChildren, mergeScope, schema, pageContext)
-        : renderSlot(renderChildren, mergeScope, schema, isCustomElm)
+    // children 空的场景，不能返回空数组，因为有部分组件会误以为使用了自定义插槽，从而无法渲染默认插槽内容，比如 TinyTree 组件
+    if (!renderChildren.length) {
+      return null
     }
-  } else {
-    return parseData(renderChildren, mergeScope, pageContext.context)
+
+    if (isNative) {
+      return renderDefault(renderChildren, mergeScope, schema)
+    }
+    return isGroup
+      ? renderGroup(renderChildren, mergeScope, pageContext)
+      : renderSlot(renderChildren, mergeScope, schema)
   }
+  return parseData(renderChildren, mergeScope, pageContext.context)
 }
 function getRenderPageId(currentPageId, isPageStart) {
   const pagePathFromRoot = (inject('page-ancestors') as Ref<any[]>).value
@@ -239,8 +244,6 @@ export const renderer = defineComponent({
     const { scope, schema, parent, ancestors } = this
     const { componentName, loop, loopArgs, condition } = schema
     const pageContext = this.currentPageContext
-    // 处理数据源和表格fetchData的映射关系
-    generateCollection(schema)
 
     if (!componentName) {
       return parseData(schema, scope, pageContext.context)
@@ -280,18 +283,28 @@ export const renderer = defineComponent({
         mergeScope = mergeScope ? { ...mergeScope, ...slotData } : slotData
       }
 
-      // 给每个节点设置schema.id，并缓存起来
-      pageContext.setNode(schema, parent)
-
       if (pageContext.conditions[schema.id] === false || !parseCondition(condition, mergeScope, pageContext.context)) {
         return null
       }
 
-      return h(
+      const Ele = h(
         component,
         getBindProps(schema, mergeScope, pageContext.context, pageContext),
         getChildren(schema, mergeScope, pageContext)
       )
+      // 区块加上 suspense 渲染，就可以在网络延时的时候显示加载中的字样或者动画，优化体验
+      if (schema.componentType === 'Block') {
+        return h(
+          Suspense,
+          {},
+          {
+            default: () => Ele,
+            fallback: () => h(BlockLoading, { name: componentName })
+          }
+        )
+      }
+
+      return Ele
     }
 
     return loopList?.length ? loopList.map(renderElement) : renderElement()
