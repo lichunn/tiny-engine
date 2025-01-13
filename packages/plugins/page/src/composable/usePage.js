@@ -247,11 +247,19 @@ const getAncestors = async (id, withFolders) => {
   return ancestors.filter((item) => item.isPage).map((item) => item.id)
 }
 
-const getPageDetailList = async (pages) => {
-  if (pages.length > 0 && !pages[0].page_content) {
-    for (const page of pages) {
-      const pageDetail = await http.fetchPageDetail(page.id)
-      page.page_content = pageDetail.page_content
+const handlePageDetail = async (pages) => {
+  const ROOT_ID = '0'
+
+  if (pages.length > 0) {
+    for (let i = 0; i < pages.length; i++) {
+      if (!pages[i].page_content) {
+        const pageDetail = await http.fetchPageDetail(pages[i].id)
+        pages[i].page_content = pageDetail.page_content
+      }
+
+      if (pages[i].parentId !== ROOT_ID && !pages.find((item) => item.id === pages[i].parentId)) {
+        pages[i].parentId = pages[i - 1]?.id ? pages[i - 1].id : ROOT_ID
+      }
     }
   }
 }
@@ -266,7 +274,7 @@ const getFamily = async (id) => {
     .filter((item) => item.isPage)
     .reverse()
 
-  await getPageDetailList(familytPages)
+  await handlePageDetail(familytPages)
 
   return familytPages
 }
