@@ -6,7 +6,7 @@
         <div class="toolbar-start">
           <slot name="toolbarStart"></slot>
         </div>
-        <div :class="['buttons', { 'engine-fullscreen': fullscreen }]" id="icon-buttons">
+        <div :class="['buttons', { 'monaco-btn-fullscreen': fullscreen }]" id="icon-buttons">
           <slot name="buttons"></slot>
           <tiny-tooltip
             v-if="showFormatBtn && options.language === 'json'"
@@ -181,7 +181,7 @@ export default {
       color: var(--te-common-icon-secondary);
     }
   }
-  .engine-fullscreen {
+  .monaco-btn-fullscreen {
     display: flex;
     margin-right: 20px;
   }

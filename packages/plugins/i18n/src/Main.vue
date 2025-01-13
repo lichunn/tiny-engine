@@ -489,6 +489,7 @@ export default {
   padding: 0 12px;
   display: flex;
   align-items: center;
+  column-gap: 8px;
   .btn-icon {
     font-size: 16px;
     color: var(--te-common-icon-secondary);
