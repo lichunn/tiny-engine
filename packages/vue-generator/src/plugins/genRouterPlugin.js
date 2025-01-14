@@ -56,15 +56,15 @@ const convertToNestedRoutes = (schema) => {
     }
 
     const parts = item.meta?.router?.split('/').filter(Boolean)
-    let curretnLevel = result
+    let currentLevel = result
 
     parts.forEach((part, index) => {
       let found = false
 
-      for (let i = 0; i < curretnLevel.length; i++) {
-        if (curretnLevel[i].path === part) {
+      for (let i = 0; i < currentLevel.length; i++) {
+        if (currentLevel[i].path === part) {
           // 如果已经存在该路径部分，则进入下一层级
-          curretnLevel = curretnLevel[i].children
+          currentLevel = currentLevel[i].children
           found = true
           break
         }
@@ -83,8 +83,8 @@ const convertToNestedRoutes = (schema) => {
           newNode.name = item.meta.id
         }
 
-        curretnLevel.push(newNode)
-        curretnLevel = newNode.children
+        currentLevel.push(newNode)
+        currentLevel = newNode.children
       }
     })
   })
