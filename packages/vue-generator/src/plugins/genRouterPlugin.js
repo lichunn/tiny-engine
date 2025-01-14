@@ -41,13 +41,13 @@ const flattenRoutes = (routes, parentPath = '') => {
 }
 
 const convertToNestedRoutes = (schema) => {
-  const pageSchema = schema.pageSchema?.sort((a, b) => a.meta?.router?.length - b.meta?.router?.length)
+  const pageSchema = (schema.pageSchema || []).sort((a, b) => a.meta?.router?.length - b.meta?.router?.length)
   const result = []
   let home = {}
   let isGetHome = false
 
   pageSchema.forEach((item) => {
-    if ((item.meta.isHome || item.meta.isDefault) && !isGetHome) {
+    if ((item.meta?.isHome || item.meta?.isDefault) && !isGetHome) {
       home = {
         path: '',
         redirect: { name: `${item.meta.id}` }
