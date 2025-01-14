@@ -90,6 +90,10 @@ export default {
       const familyPages = []
       const ancestors = queryParams.ancestors
 
+      if (!ancestors?.length || !appData?.componentsMap) {
+        return familyPages
+      }
+
       for (let i = 0; i < ancestors.length; i++) {
         const nextPage = i < ancestors.length - 1 ? ancestors[i + 1].name : null
         const panelValueAndType = {
