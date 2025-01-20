@@ -26,6 +26,7 @@ export const META_APP = {
   Media: 'engine.toolbars.media',
   Collaboration: 'engine.toolbars.collaboration',
   Clean: 'engine.toolbars.clean',
+  Theme: 'engine.toolbars.theme',
   Refresh: 'engine.toolbars.refresh',
   Save: 'engine.toolbars.save',
   GenerateCode: 'engine.toolbars.generate-code',
