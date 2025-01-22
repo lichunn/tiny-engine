@@ -4,8 +4,9 @@ export default {
   title: 'theme',
   options: {
     icon: {
-      default: 'clear'
+      default: 'light'
     },
-    renderType: 'icon'
+    renderType: 'icon',
+    multiType: true
   }
 }

@@ -6,8 +6,10 @@
       </template>
     </component>
     <slot></slot>
-    <span v-if="state.options?.collapsed">{{ state.content }}</span>
+    <span v-if="isHideMulti()">{{ state.content }}</span>
   </span>
+  <span> </span>
+  <slot name="radio"></slot>
 </template>
 
 <script>
@@ -32,6 +34,10 @@ export default {
     options: {
       type: Object,
       default: () => {}
+    },
+    position: {
+      type: String,
+      default: 'right'
     }
   },
   emits: ['click-api'],
@@ -46,21 +52,28 @@ export default {
       emit('click-api')
     }
 
+    const isShowMulti = () => (state.options?.collapsed || props.position === 'collapse') && state.options?.multiType
+    const isHideMulti = () => (state.options?.collapsed || props.position === 'collapse') && !state.options?.multiType
+
     const getRender = () => {
-      switch (props.options.renderType) {
-        case 'button':
-          return ToolbarBaseButton
-        case 'icon':
-          return ToolbarBaseIcon
-        default:
-          return false
+      if (isShowMulti()) {
+        return false
       }
+      if (props.options.renderType === 'button') {
+        return ToolbarBaseButton
+      }
+      if (props.options.renderType === 'icon') {
+        return ToolbarBaseIcon
+      }
+      return false
     }
 
     return {
       state,
       click,
-      getRender
+      getRender,
+      isShowMulti,
+      isHideMulti
     }
   }
 }
