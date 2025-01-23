@@ -12,6 +12,7 @@
 
 import { reactive } from 'vue'
 import { getMergeMeta } from '@opentiny/tiny-engine-meta-register'
+import { setGlobalMonacoEditorTheme } from '@opentiny/tiny-engine-common'
 
 const THEME_DATA = {
   LIGHT: 'light',
@@ -20,11 +21,9 @@ const THEME_DATA = {
   DARK_LABEL: '深色模式'
 }
 
-const theme = localStorage.getItem('tiny-engine-theme') || getMergeMeta('engine.config').theme || THEME_DATA.LIGHT
-
 const themeState = reactive({
-  theme: theme,
-  themeLabel: theme === THEME_DATA.LIGHT ? THEME_DATA.LIGHT_LABEL : THEME_DATA.DARK_LABEL,
+  theme: THEME_DATA.LIGHT,
+  themeLabel: THEME_DATA.LIGHT_LABEL,
   themeOptions: [
     {
       label: THEME_DATA.LIGHT_LABEL,
@@ -37,6 +36,14 @@ const themeState = reactive({
   ]
 })
 
+const initThemeState = () => {
+  themeState.theme =
+    localStorage.getItem('tiny-engine-theme') || getMergeMeta('engine.config').theme || THEME_DATA.LIGHT
+  themeState.themeLabel = themeState.theme === THEME_DATA.LIGHT ? THEME_DATA.LIGHT_LABEL : THEME_DATA.DARK_LABEL
+
+  return themeState
+}
+
 const themeChange = (data) => {
   if (data) {
     themeState.theme = data === THEME_DATA.LIGHT_LABEL ? THEME_DATA.LIGHT : THEME_DATA.DARK
@@ -47,12 +54,16 @@ const themeChange = (data) => {
   themeState.themeLabel = themeState.theme === THEME_DATA.LIGHT ? THEME_DATA.LIGHT_LABEL : THEME_DATA.DARK_LABEL
   document.documentElement.setAttribute('data-theme', themeState.theme)
   localStorage.setItem('tiny-engine-theme', themeState.theme)
+
+  const editorTheme = themeState.theme?.includes('dark') ? 'vs-dark' : 'vs'
+  setGlobalMonacoEditorTheme(editorTheme)
 }
 
 export default () => {
   return {
     THEME_DATA,
     themeState,
+    initThemeState,
     themeChange
   }
 }
