@@ -8,7 +8,7 @@ export const generateConfig = (options = {}) => {
   const configContent = `
 export default {
   id: 'engine.config',
-  theme: import.meta.env.VITE_THEME || '${theme}',
+  theme: '${theme}',
   material: ${JSON.stringify(material)},
   scripts: ${JSON.stringify(scripts)},
   styles: ${JSON.stringify(styles)},
