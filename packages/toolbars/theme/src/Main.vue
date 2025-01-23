@@ -44,7 +44,7 @@ export default {
     }
   },
   setup() {
-    const state = useTheme().themeState
+    const state = useTheme().initThemeState()
 
     const themeChange = useTheme().themeChange
 
