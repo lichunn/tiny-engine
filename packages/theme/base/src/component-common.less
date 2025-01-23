@@ -218,6 +218,10 @@
       width: 100%; // 要验证一下是否需要写死
       border-radius: var(--te-base-border-radius-1);
       text-align: center;
+      background-color: var(--te-common-bg-container);
+    }
+    .tiny-tabs__nav-wrap {
+      border-radius: var(--te-base-border-radius-1);
     }
     .tiny-tabs__item {
       flex-grow: 1;
@@ -230,11 +234,18 @@
         color: var(--te-common-text-primary);
         background-color: var(--te-common-bg-default);
         border-radius: var(--te-base-border-radius-1);
+        border: 1px solid var(--te-common-border-active);
       }
     }
     .tiny-tabs__nav-wrap-not-separator::after {
       background-color: var(--te-common-border-divider);
     }
+  }
+  .tiny-tabs__item-separator {
+    background-color: var(--te-common-bg-container);
+  }
+  .tiny-tabs__nav-scroll {
+    margin-right: 0;
   }
 }
 
@@ -719,6 +730,9 @@
 // 17、tooltip文字提示
 .tiny-tooltip.tiny-tooltip {
   &.tiny-tooltip__popper {
+    .popper__arrow {
+      background: var(--te-common-bg-popover);
+    }
     &[class*='is-light'] {
       background: var(--te-common-bg-popover);
       color: var(--te-common-text-primary);
