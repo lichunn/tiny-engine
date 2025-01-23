@@ -133,16 +133,6 @@ export default {
         color: var(--ti-lowcode-plugin-panel-title-color);
         font-weight: var(--ti-lowcode-plugin-panel-title-font-weight);
       }
-
-      .help-link {
-        display: inline-block;
-        margin-left: 20px;
-        cursor: pointer;
-        color: var(--ti-lowcode-plugin-js-help-link-color);
-        &:hover {
-          text-decoration: underline;
-        }
-      }
     }
 
     .head-right {
@@ -158,7 +148,7 @@ export default {
         .dots {
           width: 6px;
           height: 6px;
-          background: var(--te-common-color-error);
+          background: var(--ti-lowcode-common-error-color);
           border-radius: 50%;
           position: absolute;
           top: 9px;

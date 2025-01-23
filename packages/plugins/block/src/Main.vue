@@ -457,18 +457,6 @@ export default {
   .search-select {
     flex: 1;
   }
-  .add-group-btn {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    margin-left: 8px;
-    border-color: transparent;
-    background-color: var(--ti-lowcode-component-block-list-add-group-btn-bg);
-    width: 30px;
-    height: 30px;
-    border: var(--ti-lowcode-component-block-list-add-group-btn-border);
-    border-radius: var(--ti-lowcode-component-block-list-add-group-btn-border-radius);
-  }
 }
 .app-manage-search {
   padding: 0 10px 12px 10px;

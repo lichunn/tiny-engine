@@ -331,14 +331,8 @@ div.tiny-guide.shepherd-element {
   }
 }
 
-// 引导遮罩层
-.shepherd-modal-overlay-container.shepherd-modal-is-visible {
-  fill: var(--ti-lowcode-help-guide-mask-bg-color);
-}
-
 .help-plugin-box {
   cursor: auto;
-  background-color: var(--ti-lowcode-help-box-bg-color);
   border-radius: 6px;
   padding: 4px 0;
   &-top {
@@ -365,6 +359,7 @@ div.tiny-guide.shepherd-element {
     margin: 0 -16px;
     padding: 0 16px;
     color: var(--te-common-text-primary);
+    fill: var(--te-common-icon-primary);
     span {
       display: flex;
       align-items: center;

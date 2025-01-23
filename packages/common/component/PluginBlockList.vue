@@ -358,7 +358,7 @@ export default {
   padding: 12px;
   background: var(--ti-lowcode-component-block-list-shortcut-bg);
   border-radius: 5px;
-  border: 1px solid var(--te-common-border-default);
+  border: 1px solid var(--ti-lowcode-common-border-color-4);
   top: v-bind('state.top');
   .block-shortcut-title {
     color: var(--ti-lowcode-component-block-list-shortcut-title-color);
@@ -486,14 +486,6 @@ export default {
         position: static;
         margin-left: 4px;
         z-index: 9;
-        .block-detail-icon {
-          color: var(--ti-lowcode-component-block-list-setting-btn-color);
-          display: block;
-          &:hover {
-            cursor: pointer;
-            color: var(--ti-lowcode-component-block-list-setting-btn-hover-color);
-          }
-        }
       }
       &:hover {
         background-color: var(--te-common-bg-container);
@@ -598,14 +590,6 @@ export default {
       z-index: 9;
       &.is-current-visible-icon {
         visibility: visible;
-      }
-
-      .block-detail-icon {
-        color: var(--te-common-icon-secondary);
-        &:hover {
-          cursor: pointer;
-          color: var(--ti-lowcode-component-block-list-setting-btn-hover-color);
-        }
       }
     }
     .block-setting {
@@ -741,7 +725,7 @@ export default {
     box-sizing: border-box;
     cursor: pointer;
     &:hover {
-      color: var(--te-common-text-primary);
+      color: var(--ti-lowcode-common-primary-text-color);
     }
     .list-item-icon {
       font-size: 14px;
