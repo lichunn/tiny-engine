@@ -61,6 +61,7 @@
   }
   // 选项框字体
   .tiny-option {
+    font-size: var(--te-base-font-size-base);
     // 选中状态
     &.selected {
       color: var(--te-common-text-emphasize);
@@ -161,6 +162,7 @@
 
   .tiny-collapse-item__content {
     color: var(--te-common-text-primary);
+    font-size: var(--te-base-font-size-base);
   }
 
   .tiny-collapse-item__wrap {
@@ -170,6 +172,7 @@
 
 // 4、树-tree
 .tiny-tree.tiny-tree {
+  background-color: var(--te-common-bg-default);
   .tiny-tree-node__wrapper {
     cursor: pointer;
     color: var(--te-common-text-primary);
@@ -242,6 +245,7 @@
     border-radius: var(--te-base-border-radius-1);
     border: 1px solid var(--te-common-border-default);
     font-size: var(--te-base-font-size-base);
+    background-color: transparent;
   }
   .focus {
     border-color: var(--te-common-border-active);
@@ -279,6 +283,7 @@
     height: auto;
     font-size: var(--te-base-font-size-1);
     color: var(--te-common-text-primary);
+    background-color: var(--te-common-bg-popover);
     padding: 0;
     .tiny-dialog-box__close {
       font-size: var(--te-base-font-size-1);
@@ -323,7 +328,7 @@
     }
     .tiny-button--primary,
     .tiny-button--info {
-      margin-left: 4px;
+      margin-left: 12px;
     }
     .tiny-button--default.tiny-button--default {
       border-color: var(--te-common-border-secondary);
@@ -393,6 +398,7 @@
   .tiny-svg {
     margin-right: 4px;
     color: var(--te-common-icon-secondary);
+    fill: var(--te-common-icon-secondary);
     font-size: 16px;
   }
 }

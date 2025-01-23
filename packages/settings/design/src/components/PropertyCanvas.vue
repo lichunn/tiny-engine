@@ -236,7 +236,7 @@ export default {
     .tiny-collapse-item {
       &.is-active {
         .tiny-collapse-item__header {
-          border-bottom: 1px solid var(--ti-lowcode-common-border-color);
+          border-bottom: 1px solid var(--te-common-border-divider);
           height: 36px;
         }
       }

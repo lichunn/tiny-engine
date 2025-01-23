@@ -252,9 +252,8 @@ export default {
     :deep(.tiny-form-item) {
       margin-bottom: 16px;
       .tiny-input-group__prepend {
-        border: 1px solid var(--ti-lowcode-page-manage-input-group-border-color);
-        background: var(--ti-lowcode-page-manage-input-group-color);
-        border-right: 1px solid var(--ti-lowcode-page-manage-input-group-border-right-color);
+        border: 1px solid var(--te-common-border-default);
+        background: var(--te-common-bg-default);
       }
       .page-type-radio {
         color: var(--ti-lowcode-page-manage-title-background-text-color);
@@ -268,18 +267,15 @@ export default {
     }
   }
   .tip {
-    color: var(--ti-lowcode-page-manage-tip-border-color);
+    color: var(--ti-lowcode-page-manage-tip-text-color);
     font-size: 12px;
     border-radius: 3px;
     display: flex;
     align-items: center;
     height: 16px;
     margin-top: 4px;
-    .icon {
-      color: var(--ti-lowcode-page-manage-icon-text-color);
-    }
     .text {
-      color: var(--ti-lowcode-page-manage-btn-text-color);
+      color: var(--te-common-text-weaken);
     }
     .text-dim {
       color: var(--ti-lowcode-plugin-panel-title-color);
@@ -290,7 +286,6 @@ export default {
 <style lang="less">
 .tiny-select-dropdown.parent-fold-select-dropdown {
   padding: 8px 0;
-
   .tiny-tree {
     .tiny-tree-node {
       .tiny-tree-node__content {
