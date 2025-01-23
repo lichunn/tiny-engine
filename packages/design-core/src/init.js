@@ -72,8 +72,9 @@ const defaultLifeCycles = {
     window.lowcodeI18n = i18n
     app.use(i18n).use(injectGlobalComponents)
 
-    const theme = getMergeMeta('engine.config').theme?.includes('dark') ? 'vs-dark' : 'vs'
-    setGlobalMonacoEditorTheme(theme)
+    const theme = localStorage.getItem('tiny-engine-theme') || getMergeMeta('engine.config').theme
+    const editorTheme = theme?.includes('dark') ? 'vs-dark' : 'vs'
+    setGlobalMonacoEditorTheme(editorTheme)
   }
 }
 
