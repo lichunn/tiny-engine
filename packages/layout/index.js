@@ -24,7 +24,8 @@ export default {
         ['engine.toolbars.collaboration'],
         ['engine.toolbars.refresh', 'engine.toolbars.fullscreen'],
         ['engine.toolbars.lang'],
-        ['engine.toolbars.viewSetting']
+        ['engine.toolbars.viewSetting'],
+        ['engine.toolbars.theme']
       ]
     }
   },
