@@ -11,7 +11,7 @@
  */
 
 import { reactive } from 'vue'
-import { getMergeMeta } from '@opentiny/tiny-engine-meta-register'
+import { getMetaApi, getMergeMeta, META_SERVICE } from '@opentiny/tiny-engine-meta-register'
 import { setGlobalMonacoEditorTheme } from '@opentiny/tiny-engine-common'
 
 const THEME_DATA = {
@@ -37,8 +37,10 @@ const themeState = reactive({
 })
 
 const initThemeState = () => {
+  const appId = getMetaApi(META_SERVICE.GlobalService).getBaseInfo().id
+
   themeState.theme =
-    localStorage.getItem('tiny-engine-theme') || getMergeMeta('engine.config').theme || THEME_DATA.LIGHT
+    localStorage.getItem(`tiny-engine-theme-${appId}`) || getMergeMeta('engine.config').theme || THEME_DATA.LIGHT
   themeState.themeLabel = themeState.theme === THEME_DATA.LIGHT ? THEME_DATA.LIGHT_LABEL : THEME_DATA.DARK_LABEL
 
   return themeState
@@ -53,9 +55,10 @@ const themeChange = (data) => {
 
   themeState.themeLabel = themeState.theme === THEME_DATA.LIGHT ? THEME_DATA.LIGHT_LABEL : THEME_DATA.DARK_LABEL
   document.documentElement.setAttribute('data-theme', themeState.theme)
-  localStorage.setItem('tiny-engine-theme', themeState.theme)
 
+  const appId = getMetaApi(META_SERVICE.GlobalService).getBaseInfo().id
   const editorTheme = themeState.theme?.includes('dark') ? 'vs-dark' : 'vs'
+  localStorage.setItem(`tiny-engine-theme-${appId}`, themeState.theme)
   setGlobalMonacoEditorTheme(editorTheme)
 }
 

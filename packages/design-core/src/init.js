@@ -21,6 +21,8 @@ import {
   defineEntry,
   mergeRegistry,
   getMergeMeta,
+  getMetaApi,
+  META_SERVICE,
   initServices,
   initHook,
   HOOK_NAME,
@@ -37,6 +39,7 @@ const defaultLifeCycles = {
   beforeAppCreate: ({ registry }) => {
     // 合并用户自定义注册表
     const newRegistry = mergeRegistry(registry, defaultRegistry)
+    const appId = getMetaApi(META_SERVICE.GlobalService).getBaseInfo().id
     if (process.env.NODE_ENV === 'development') {
       console.log('default registry:', defaultRegistry) // eslint-disable-line
       console.log('merged registry:', registry) // eslint-disable-line
@@ -55,7 +58,7 @@ const defaultLifeCycles = {
     // 加载主题样式，尽早加载
     // import(`./theme/${newRegistry.config.theme}.js`)
 
-    const theme = localStorage.getItem('tiny-engine-theme') || newRegistry.config.theme || 'light'
+    const theme = localStorage.getItem(`tiny-engine-theme-${appId}`) || newRegistry.config.theme || 'light'
     // eslint-disable-next-line no-new
     new TinyThemeTool(defaultThemeList[theme], defaultThemeList[theme]?.id)
     document.documentElement?.setAttribute?.('data-theme', theme)
@@ -72,7 +75,8 @@ const defaultLifeCycles = {
     window.lowcodeI18n = i18n
     app.use(i18n).use(injectGlobalComponents)
 
-    const theme = localStorage.getItem('tiny-engine-theme') || getMergeMeta('engine.config').theme
+    const appId = getMetaApi(META_SERVICE.GlobalService).getBaseInfo().id
+    const theme = localStorage.getItem(`tiny-engine-theme-${appId}`) || getMergeMeta('engine.config').theme
     const editorTheme = theme?.includes('dark') ? 'vs-dark' : 'vs'
     setGlobalMonacoEditorTheme(editorTheme)
   }
