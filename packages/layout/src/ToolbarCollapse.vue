@@ -10,7 +10,7 @@
         <div class="toolbar-list-button" v-if="typeof item === 'string'">
           <component
             :is="getMergeMeta(item)?.entry"
-            :options="getMergeMeta(comp).options"
+            :options="getMergeMeta(item).options"
             position="collapse"
           ></component>
         </div>
