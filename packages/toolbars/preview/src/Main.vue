@@ -80,7 +80,7 @@ export default {
         const page = getCurrentPage()
         params.id = page?.id
         params.pageInfo.name = page?.name
-        params.ancestors = await getFamily(params.id)
+        params.ancestors = await getFamily(params)
         previewPage(params)
       }
 

@@ -395,11 +395,14 @@ const switchPageWithConfirm = (pageId) => {
   })
 }
 
-const handlePageDetail = async (pages) => {
-  const ROOT_ID = '0'
+const handlePageDetail = async (pages, currentPage) => {
+  const { ROOT_ID } = pageSettingState
 
   if (pages.length > 0) {
     for (let i = 0; i < pages.length; i++) {
+      if (pages[i].id === currentPage.id) {
+        pages[i].page_content = currentPage.pageInfo?.schema
+      }
       if (!pages[i].page_content) {
         const pageDetail = await http.fetchPageDetail(pages[i].id)
         pages[i].page_content = pageDetail.page_content
@@ -412,16 +415,16 @@ const handlePageDetail = async (pages) => {
   }
 }
 
-const getFamily = async (id) => {
+const getFamily = async (page) => {
   if (pageSettingState.pages.length === 0) {
     await getPageList()
   }
 
-  const familyPages = getAncestorsRecursively(id)
+  const familyPages = getAncestorsRecursively(page.id)
     .filter((item) => item.isPage)
     .reverse()
 
-  await handlePageDetail(familyPages)
+  await handlePageDetail(familyPages, page)
 
   return familyPages
 }
