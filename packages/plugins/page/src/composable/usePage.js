@@ -404,8 +404,12 @@ const updatePageContent = (page, currentPage) => {
 
 const fetchPageDetailIfNeeded = async (page) => {
   if (!page.page_content) {
-    const pageDetail = await http.fetchPageDetail(page.id)
-    page.page_content = pageDetail.page_content
+    try {
+      const pageDetail = await http.fetchPageDetail(page.id)
+      page.page_content = pageDetail.page_content
+    } catch (error) {
+      page.page_content = {}
+    }
   }
   return page
 }
