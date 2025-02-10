@@ -395,36 +395,53 @@ const switchPageWithConfirm = (pageId) => {
   })
 }
 
+const updatePageContent = (page, currentPage) => {
+  if (currentPage.id && currentPage.pageInfo?.schema && page.id === currentPage.id) {
+    page.page_content = currentPage.pageInfo?.schema
+  }
+  return page
+}
+
+const fetchPageDetailIfNeeded = async (page) => {
+  if (!page.page_content) {
+    const pageDetail = await http.fetchPageDetail(page.id)
+    page.page_content = pageDetail.page_content
+  }
+  return page
+}
+
+const updateParentId = (page, pages, index, ROOT_ID) => {
+  if (page.parentId !== ROOT_ID && !pages.find((item) => item.id === page.parentId)) {
+    page.parentId = pages[index - 1]?.id ? pages[index - 1].id : ROOT_ID
+  }
+}
+
 const handlePageDetail = async (pages, currentPage) => {
   const { ROOT_ID } = pageSettingState
 
   if (pages.length > 0) {
-    for (let i = 0; i < pages.length; i++) {
-      if (pages[i].id === currentPage.id) {
-        pages[i].page_content = currentPage.pageInfo?.schema
-      }
-      if (!pages[i].page_content) {
-        const pageDetail = await http.fetchPageDetail(pages[i].id)
-        pages[i].page_content = pageDetail.page_content
-      }
+    pages = await Promise.all(
+      pages.map(async (page, index) => {
+        page = updatePageContent(page, currentPage)
+        page = await fetchPageDetailIfNeeded(page)
+        page = updateParentId(page, pages, index, ROOT_ID)
 
-      if (pages[i].parentId !== ROOT_ID && !pages.find((item) => item.id === pages[i].parentId)) {
-        pages[i].parentId = pages[i - 1]?.id ? pages[i - 1].id : ROOT_ID
-      }
-    }
+        return page
+      })
+    )
   }
 }
 
-const getFamily = async (page) => {
+const getFamily = async (previewParams) => {
   if (pageSettingState.pages.length === 0) {
     await getPageList()
   }
 
-  const familyPages = getAncestorsRecursively(page.id)
+  const familyPages = getAncestorsRecursively(previewParams.id)
     .filter((item) => item.isPage)
     .reverse()
 
-  await handlePageDetail(familyPages, page)
+  await handlePageDetail(familyPages, previewParams)
 
   return familyPages
 }
