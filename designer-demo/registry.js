@@ -21,7 +21,7 @@ import {
   Redoundo,
   Save,
   Clean,
-  Theme,
+  ThemeSwitch,
   Preview,
   GenerateCode,
   Refresh,
@@ -87,7 +87,7 @@ export default {
     }
   ],
   toolbars: [
-    Theme,
+    ThemeSwitch,
     Logo,
     Breadcrumb,
     Lock,

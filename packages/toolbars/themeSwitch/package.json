@@ -1,5 +1,5 @@
 {
-  "name": "@opentiny/tiny-engine-toolbar-theme",
+  "name": "@opentiny/tiny-engine-toolbar-theme-switch",
   "version": "2.2.0",
   "publishConfig": {
     "access": "public"
@@ -16,7 +16,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/opentiny/tiny-engine",
-    "directory": "packages/toolbars/theme"
+    "directory": "packages/toolbars/themeSwitch"
   },
   "bugs": {
     "url": "https://github.com/opentiny/tiny-engine/issues"
