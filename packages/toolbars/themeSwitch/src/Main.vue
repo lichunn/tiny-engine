@@ -1,5 +1,5 @@
 <template>
-  <div class="toolbar-theme">
+  <div class="toolbar-theme-switch">
     <toolbar-base
       :content="state.themeLabel"
       :icon="state.theme"
@@ -8,8 +8,8 @@
       @click-api="themeChange"
     >
       <template #radio v-if="position === 'collapse'">
-        <div class="toolbar-theme-radio">
-          <div class="toolbar-theme-radio-title">主题</div>
+        <div class="toolbar-theme-switch-radio">
+          <div class="toolbar-theme-switch-radio-title">主题</div>
           <tiny-radio-group
             v-model="state.themeLabel"
             :options="state.themeOptions"
@@ -23,7 +23,7 @@
   </div>
 </template>
 
-<script lang="jsx">
+<script>
 import { ToolbarBase } from '@opentiny/tiny-engine-common'
 import { RadioGroup } from '@opentiny/vue'
 import useTheme from './composable/useTheme.js'
@@ -55,11 +55,11 @@ export default {
   }
 }
 </script>
-<style scoped>
-.toolbar-theme-radio {
+<style lang="less" scoped>
+.toolbar-theme-switch-radio {
   height: 44px;
-  .toolbar-theme-radio-title {
-    color: var(--te-toolbar-theme-radio-title);
+  .toolbar-theme-switch-radio-title {
+    color: var(--te-toolbar-theme-switch-radio-title);
   }
 }
 </style>

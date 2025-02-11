@@ -8,7 +8,6 @@
     <slot></slot>
     <span v-if="isHideMulti()">{{ state.content }}</span>
   </span>
-  <span> </span>
   <slot name="radio"></slot>
 </template>
 
@@ -33,7 +32,7 @@ export default {
     },
     options: {
       type: Object,
-      default: () => {}
+      default: () => ({})
     },
     position: {
       type: String,

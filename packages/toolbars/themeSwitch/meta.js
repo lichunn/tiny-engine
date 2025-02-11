@@ -1,5 +1,5 @@
 export default {
-  id: 'engine.toolbars.theme',
+  id: 'engine.toolbars.themeSwitch',
   type: 'toolbars',
   title: 'theme',
   options: {
