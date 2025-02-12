@@ -10,12 +10,7 @@
       <template #radio v-if="position === 'collapse'">
         <div class="toolbar-theme-switch-radio">
           <div class="toolbar-theme-switch-radio-title">主题</div>
-          <tiny-radio-group
-            v-model="state.themeLabel"
-            :options="state.themeOptions"
-            class="theme-radio-group"
-            @change="themeChange"
-          >
+          <tiny-radio-group v-model="state.theme" :options="THEME_DATA" class="theme-radio-group" @change="themeChange">
           </tiny-radio-group>
         </div>
       </template>
@@ -44,11 +39,13 @@ export default {
     }
   },
   setup() {
+    const THEME_DATA = useTheme().THEME_DATA
     const state = useTheme().initThemeState()
 
     const themeChange = useTheme().themeChange
 
     return {
+      THEME_DATA,
       state,
       themeChange
     }

@@ -14,46 +14,48 @@ import { reactive } from 'vue'
 import { getMetaApi, getMergeMeta, META_SERVICE } from '@opentiny/tiny-engine-meta-register'
 import { setGlobalMonacoEditorTheme } from '@opentiny/tiny-engine-common'
 
-const THEME_DATA = {
-  LIGHT: 'light',
-  LIGHT_LABEL: '浅色模式',
-  DARK: 'dark',
-  DARK_LABEL: '深色模式'
-}
+const THEME_DATA = [
+  {
+    text: '浅色模式',
+    label: 'light',
+    oppositeTheme: 'dark'
+  },
+  {
+    text: '深色模式',
+    label: 'dark',
+    oppositeTheme: 'light'
+  }
+]
+
+const DEFAULT_THEME = THEME_DATA[0]
 
 const themeState = reactive({
-  theme: THEME_DATA.LIGHT,
-  themeLabel: THEME_DATA.LIGHT_LABEL,
-  themeOptions: [
-    {
-      label: THEME_DATA.LIGHT_LABEL,
-      value: THEME_DATA.LIGHT
-    },
-    {
-      label: THEME_DATA.DARK_LABEL,
-      value: THEME_DATA.DARK
-    }
-  ]
+  theme: DEFAULT_THEME.label,
+  themeLabel: DEFAULT_THEME.text
 })
+
+const getTheme = (theme) => {
+  return THEME_DATA.find((item) => theme === item.label) || DEFAULT_THEME
+}
 
 const initThemeState = () => {
   const appId = getMetaApi(META_SERVICE.GlobalService).getBaseInfo().id
 
   themeState.theme =
-    localStorage.getItem(`tiny-engine-theme-${appId}`) || getMergeMeta('engine.config').theme || THEME_DATA.LIGHT
-  themeState.themeLabel = themeState.theme === THEME_DATA.LIGHT ? THEME_DATA.LIGHT_LABEL : THEME_DATA.DARK_LABEL
+    localStorage.getItem(`tiny-engine-theme-${appId}`) || getMergeMeta('engine.config').theme || DEFAULT_THEME.label
+  themeState.themeLabel = getTheme(themeState.theme).text
 
   return themeState
 }
 
 const themeChange = (data) => {
   if (data) {
-    themeState.theme = data === THEME_DATA.LIGHT_LABEL ? THEME_DATA.LIGHT : THEME_DATA.DARK
+    themeState.theme = getTheme(data).label
   } else {
-    themeState.theme = themeState.theme === THEME_DATA.LIGHT ? THEME_DATA.DARK : THEME_DATA.LIGHT
+    themeState.theme = getTheme(themeState.theme).oppositeTheme
   }
 
-  themeState.themeLabel = themeState.theme === THEME_DATA.LIGHT ? THEME_DATA.LIGHT_LABEL : THEME_DATA.DARK_LABEL
+  themeState.themeLabel = getTheme(themeState.theme).text
   document.documentElement.setAttribute('data-theme', themeState.theme)
 
   const appId = getMetaApi(META_SERVICE.GlobalService).getBaseInfo().id
