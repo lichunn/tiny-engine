@@ -21,7 +21,7 @@
 <script>
 import { ToolbarBase } from '@opentiny/tiny-engine-common'
 import { RadioGroup } from '@opentiny/vue'
-import useTheme from './composable/useTheme.js'
+import useThemeSwitch from './composable/useThemeSwitch.js'
 
 export default {
   components: {
@@ -39,10 +39,10 @@ export default {
     }
   },
   setup() {
-    const THEME_DATA = useTheme().THEME_DATA
-    const state = useTheme().initThemeState()
+    const THEME_DATA = useThemeSwitch().THEME_DATA
+    const state = useThemeSwitch().initThemeState()
 
-    const themeChange = useTheme().themeChange
+    const themeChange = useThemeSwitch().themeChange
 
     return {
       THEME_DATA,

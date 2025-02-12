@@ -12,9 +12,13 @@
 
 import entry from './src/Main.vue'
 import metaData from './meta'
+import { ThemeSwitchService } from './src/composable'
 import './src/styles/vars.less'
 
 export default {
   ...metaData,
-  entry
+  entry,
+  metas: [ThemeSwitchService]
 }
+
+export { ThemeSwitchService }

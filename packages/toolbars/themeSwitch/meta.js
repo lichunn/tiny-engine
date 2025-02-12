@@ -1,7 +1,7 @@
 export default {
   id: 'engine.toolbars.themeSwitch',
   type: 'toolbars',
-  title: 'theme',
+  title: 'themeSwitch',
   options: {
     icon: {
       default: 'light'
