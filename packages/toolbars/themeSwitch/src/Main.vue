@@ -7,10 +7,10 @@
       :position="position"
       @click-api="themeChange"
     >
-      <template #radio v-if="position === 'collapse'">
+      <template v-if="position === 'collapse'">
         <div class="toolbar-theme-switch-radio">
           <div class="toolbar-theme-switch-radio-title">主题</div>
-          <tiny-radio-group v-model="state.theme" :options="THEME_DATA" class="theme-radio-group" @change="themeChange">
+          <tiny-radio-group v-model="state.theme" :options="THEME_DATA" class="theme-radio-group" @change="radioChange">
           </tiny-radio-group>
         </div>
       </template>
@@ -38,16 +38,25 @@ export default {
       default: 'right'
     }
   },
-  setup() {
+  setup(props) {
     const THEME_DATA = useThemeSwitch().THEME_DATA
     const state = useThemeSwitch().initThemeState()
 
-    const themeChange = useThemeSwitch().themeChange
+    const themeChange = () => {
+      if (props.position === 'collapse') {
+        return
+      }
+
+      useThemeSwitch().themeChange()
+    }
+
+    const radioChange = useThemeSwitch().themeChange
 
     return {
       THEME_DATA,
       state,
-      themeChange
+      themeChange,
+      radioChange
     }
   }
 }

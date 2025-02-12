@@ -8,7 +8,6 @@
     <slot></slot>
     <span v-if="isHideMulti()">{{ state.content }}</span>
   </span>
-  <slot name="radio"></slot>
 </template>
 
 <script>
