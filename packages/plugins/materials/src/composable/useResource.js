@@ -23,8 +23,7 @@ import {
   getMetaApi,
   META_APP,
   useMessage,
-  META_SERVICE,
-  usePage
+  META_SERVICE
 } from '@opentiny/tiny-engine-meta-register'
 
 const { COMPONENT_NAME, DEFAULT_INTERCEPTOR } = constants
@@ -38,12 +37,21 @@ const appSchemaState = reactive({
   materialsDeps: { scripts: [], styles: new Set() }
 })
 
+function goPage(pageId) {
+  if (!pageId) {
+    return
+  }
+
+  getMetaApi(META_SERVICE.GlobalService).updatePageId(pageId)
+}
+
 const initPage = (pageInfo) => {
   try {
     if (pageInfo.meta) {
       const { occupier } = pageInfo.meta
 
       useLayout().layoutState.pageStatus = getCanvasStatus(occupier)
+      goPage(pageInfo.meta?.id)
     } else {
       useLayout().layoutState.pageStatus = {
         state: 'empty',
@@ -54,12 +62,6 @@ const initPage = (pageInfo) => {
     pageInfo.id = pageInfo.meta?.id
   } catch (error) {
     console.log(error) // eslint-disable-line
-  } finally {
-    const url = new URL(window.location)
-
-    url.searchParams.set('pageid', pageInfo.id)
-    window.history.pushState({}, '', url)
-    usePage().postLocationHistoryChanged({ pageId: pageInfo.id })
   }
 
   const { id, meta, ...pageSchema } = pageInfo

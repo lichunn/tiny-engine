@@ -27,9 +27,6 @@ import http from '../http'
 
 const { ELEMENT_TAG, COMPONENT_NAME } = constants
 
-import { useMessage } from '@opentiny/tiny-engine-meta-register'
-const { publish } = useMessage()
-const postLocationHistoryChanged = (data) => publish({ topic: 'locationHistoryChanged', data })
 import { getOptions } from '@opentiny/tiny-engine-meta-register'
 
 const DEFAULT_PAGE = {
@@ -74,6 +71,9 @@ const pageSettingState = reactive({
 const isTemporaryPage = reactive({
   saved: false
 })
+
+const STATIC_PAGE_GROUP_ID = 0
+const COMMON_PAGE_GROUP_ID = 1
 
 const generateCssString = (pageOptions, materialsOptions) => {
   if (!pageOptions?.pageBaseStyle?.className || !pageOptions?.pageBaseStyle?.style) {
@@ -151,10 +151,21 @@ const isCurrentDataSame = () => {
   return isEqual
 }
 
+const getParentNode = (parentId) => {
+  return parentId === pageSettingState.ROOT_ID
+    ? { id: pageSettingState.ROOT_ID, children: pageSettingState.pages[STATIC_PAGE_GROUP_ID].data }
+    : pageSettingState.treeDataMapping[parentId]
+}
+
 const changeTreeData = (newParentId, oldParentId) => {
-  if (newParentId && oldParentId && newParentId !== oldParentId) {
-    const folderData = pageSettingState.treeDataMapping[newParentId]
-    const parentData = pageSettingState.treeDataMapping[oldParentId]
+  if (newParentId && oldParentId && String(newParentId) !== String(oldParentId)) {
+    const folderData = getParentNode(newParentId)
+    const parentData = getParentNode(oldParentId)
+
+    if (!folderData || !parentData) {
+      return
+    }
+
     const currentPageDataId = pageSettingState.currentPageData.id
     const curDataIndex = parentData.children?.findIndex?.(({ id }) => id === currentPageDataId)
 
@@ -186,9 +197,6 @@ const resetPageData = () => {
 
 // 判断当前页面内容是否有修改
 const isChangePageData = () => !isEqual(pageSettingState.currentPageData, pageSettingState.currentPageDataCopy)
-
-const STATIC_PAGE_GROUP_ID = 0
-const COMMON_PAGE_GROUP_ID = 1
 
 /**
  *
@@ -308,22 +316,13 @@ const clearCurrentState = () => {
   pageState.pageSchema = null
 }
 
-const updateUrlPageId = (id) => {
-  const url = new URL(window.location)
-
-  url.searchParams.delete('blockid')
-  url.searchParams.set('pageid', id)
-  window.history.pushState({}, '', url)
-  postLocationHistoryChanged({ pageId: id })
-}
-
 const switchPage = (pageId) => {
   // 切换页面时清空 选中节点信息状态
   clearCurrentState()
 
   // pageId !== 0 防止 pageId 为 0 的时候判断不出来
   if (pageId !== 0 && !pageId) {
-    updateUrlPageId('')
+    getMetaApi(META_SERVICE.GlobalService).updatePageId('')
     useCanvas().initData({ componentName: COMPONENT_NAME.Page }, {})
     useLayout().layoutState.pageStatus = {
       state: 'empty',
@@ -341,7 +340,7 @@ const switchPage = (pageId) => {
         useBreadcrumb().setBreadcrumbPage([data.name])
       }
 
-      updateUrlPageId(pageId)
+      getMetaApi(META_SERVICE.GlobalService).updatePageId(pageId)
       useLayout().closePlugin()
       useLayout().layoutState.pageStatus = getCanvasStatus(data.occupier)
       useCanvas().initData(data['page_content'], data)
@@ -417,7 +416,6 @@ const getFamily = async (id) => {
 
 export default () => {
   return {
-    postLocationHistoryChanged,
     getDefaultPage,
     selectedTemplateCard,
     pageSettingState,

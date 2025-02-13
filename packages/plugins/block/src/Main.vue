@@ -133,13 +133,22 @@ import {
 } from '@opentiny/vue'
 import { IconSearch } from '@opentiny/vue-icon'
 import { PluginPanel, PluginBlockList, SvgButton } from '@opentiny/tiny-engine-common'
-import { useBlock, useModal, useLayout, useCanvas, useHelp } from '@opentiny/tiny-engine-meta-register'
+import {
+  useBlock,
+  useModal,
+  useLayout,
+  useCanvas,
+  useHelp,
+  getMetaApi,
+  META_SERVICE
+} from '@opentiny/tiny-engine-meta-register'
 import { constants } from '@opentiny/tiny-engine-utils'
 import BlockSetting, { openPanel, closePanel } from './BlockSetting.vue'
 import BlockGroupArrange from './BlockGroupArrange.vue'
 import CategoryEdit from './CategoryEdit.vue'
 import SaveNewBlock from './SaveNewBlock.vue'
 import {
+  setCurrentCategory,
   saveBlock,
   initEditBlock,
   mountedHook,
@@ -302,11 +311,7 @@ export default {
         useBlock().initBlock(block, {}, isEdit)
         useLayout().closePlugin()
         closePanel()
-        const url = new URL(window.location)
-        url.searchParams.delete('pageid')
-        url.searchParams.set('blockid', block.id)
-        window.history.pushState({}, '', url)
-        useBlock().postLocationHistoryChanged({ blockId: block.id })
+        getMetaApi(META_SERVICE.GlobalService).updateBlockId(block.id)
       } else {
         confirm({
           message: '当前画布内容尚未保存，是否要继续切换?',
@@ -347,13 +352,8 @@ export default {
         }
 
     const changeCategory = (val) => {
-      let params = useBlock().shouldReplaceCategoryWithGroup() ? { groupId: val } : { categoryId: val }
-
-      if (!val) {
-        params = {}
-      }
-
-      updateBlockList(params)
+      setCurrentCategory(val)
+      updateBlockList()
     }
 
     const editCategory = (category) => {
