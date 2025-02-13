@@ -6,7 +6,6 @@ export default {
     icon: {
       default: 'light'
     },
-    renderType: 'icon',
-    multiType: true
+    renderType: 'icon'
   }
 }

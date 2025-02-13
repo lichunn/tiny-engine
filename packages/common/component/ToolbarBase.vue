@@ -6,7 +6,7 @@
       </template>
     </component>
     <slot></slot>
-    <span v-if="isHideMulti()">{{ state.content }}</span>
+    <span v-if="isShowContent">{{ state.content }}</span>
   </span>
 </template>
 
@@ -50,13 +50,9 @@ export default {
       emit('click-api')
     }
 
-    const isShowMulti = () => (state.options?.collapsed || props.position === 'collapse') && state.options?.multiType
-    const isHideMulti = () => (state.options?.collapsed || props.position === 'collapse') && !state.options?.multiType
+    const isShowContent = computed(() => (state.options?.collapsed || props.position === 'collapse') && props.content)
 
     const getRender = () => {
-      if (isShowMulti()) {
-        return false
-      }
       if (props.options.renderType === 'button') {
         return ToolbarBaseButton
       }
@@ -70,8 +66,7 @@ export default {
       state,
       click,
       getRender,
-      isShowMulti,
-      isHideMulti
+      isShowContent
     }
   }
 }

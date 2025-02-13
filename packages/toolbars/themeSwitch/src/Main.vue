@@ -1,9 +1,9 @@
 <template>
   <div class="toolbar-theme-switch">
     <toolbar-base
-      :content="state.themeLabel"
-      :icon="state.theme"
-      :options="options"
+      :content="baseContent"
+      :icon="baseIcon"
+      :options="optionsData"
       :position="position"
       @click-api="themeChange"
     >
@@ -19,6 +19,7 @@
 </template>
 
 <script>
+import { computed } from 'vue'
 import { ToolbarBase } from '@opentiny/tiny-engine-common'
 import { RadioGroup } from '@opentiny/vue'
 import useThemeSwitch from './composable/useThemeSwitch.js'
@@ -40,10 +41,21 @@ export default {
   },
   setup(props) {
     const THEME_DATA = useThemeSwitch().THEME_DATA
+    const COLLAPSE = 'collapse'
     const state = useThemeSwitch().initThemeState()
+    const optionsData = computed(() => {
+      const options = { ...props.options }
+      if (props.position === COLLAPSE) {
+        options.renderType = ''
+      }
+
+      return options
+    })
+    const baseContent = computed(() => (props.position === COLLAPSE ? '' : state.themeLabel))
+    const baseIcon = computed(() => (props.position === COLLAPSE ? '' : state.theme))
 
     const themeChange = () => {
-      if (props.position === 'collapse') {
+      if (props.position === COLLAPSE) {
         return
       }
 
@@ -55,6 +67,9 @@ export default {
     return {
       THEME_DATA,
       state,
+      optionsData,
+      baseContent,
+      baseIcon,
       themeChange,
       radioChange
     }
