@@ -387,7 +387,6 @@ const updatePageContent = (page, currentPage) => {
   if (currentPage.id && currentPage.pageInfo?.schema && page.id === currentPage.id) {
     page.page_content = currentPage.pageInfo?.schema
   }
-  return page
 }
 
 const fetchPageDetailIfNeeded = async (page) => {
@@ -399,7 +398,6 @@ const fetchPageDetailIfNeeded = async (page) => {
       page.page_content = {}
     }
   }
-  return page
 }
 
 const updateParentId = (page, pages, index, ROOT_ID) => {
@@ -414,9 +412,9 @@ const handlePageDetail = async (pages, currentPage) => {
   if (pages.length > 0) {
     pages = await Promise.all(
       pages.map(async (page, index) => {
-        page = updatePageContent(page, currentPage)
-        page = await fetchPageDetailIfNeeded(page)
-        page = updateParentId(page, pages, index, ROOT_ID)
+        updatePageContent(page, currentPage)
+        await fetchPageDetailIfNeeded(page)
+        updateParentId(page, pages, index, ROOT_ID)
 
         return page
       })
