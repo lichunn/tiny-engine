@@ -58,10 +58,8 @@ export default {
         message: '是否确定要将此页面设置为主页？您所做的任何未保存的更改都将被丢弃。',
         exec: () => {
           const { id } = pageSettingState.currentPageData
-          const ROOT_ID = pageSettingState.ROOT_ID
           const params = { ...pageSettingState.currentPageData }
 
-          params.parentId = ROOT_ID
           params.isHome = true
 
           handleRouteHomeUpdate(id, params)
