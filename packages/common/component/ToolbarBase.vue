@@ -6,7 +6,7 @@
       </template>
     </component>
     <slot></slot>
-    <span v-if="isShowContent">{{ state.content }}</span>
+    <span v-if="state.options?.collapsed && content">{{ state.content }}</span>
   </span>
 </template>
 
@@ -32,10 +32,6 @@ export default {
     options: {
       type: Object,
       default: () => ({})
-    },
-    position: {
-      type: String,
-      default: 'right'
     }
   },
   emits: ['click-api'],
@@ -50,8 +46,6 @@ export default {
       emit('click-api')
     }
 
-    const isShowContent = computed(() => (state.options?.collapsed || props.position === 'collapse') && props.content)
-
     const getRender = () => {
       if (props.options.renderType === 'button') {
         return ToolbarBaseButton
@@ -65,8 +59,7 @@ export default {
     return {
       state,
       click,
-      getRender,
-      isShowContent
+      getRender
     }
   }
 }

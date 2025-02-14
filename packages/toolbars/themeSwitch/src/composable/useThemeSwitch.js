@@ -38,23 +38,8 @@ const getTheme = (theme) => {
   return THEME_DATA.find((item) => theme === item.label) || DEFAULT_THEME
 }
 
-const initThemeState = () => {
-  const appId = getMetaApi(META_SERVICE.GlobalService).getBaseInfo().id
-
-  themeState.theme =
-    localStorage.getItem(`tiny-engine-theme-${appId}`) || getMergeMeta('engine.config').theme || DEFAULT_THEME.label
-  themeState.themeLabel = getTheme(themeState.theme).text
-
-  return themeState
-}
-
-const themeChange = (data) => {
-  if (data) {
-    themeState.theme = getTheme(data).label
-  } else {
-    themeState.theme = getTheme(themeState.theme).oppositeTheme
-  }
-
+const themeChange = (theme) => {
+  themeState.theme = getTheme(theme).label
   themeState.themeLabel = getTheme(themeState.theme).text
   document.documentElement.setAttribute('data-theme', themeState.theme)
 
@@ -64,10 +49,19 @@ const themeChange = (data) => {
   setGlobalMonacoEditorTheme(editorTheme)
 }
 
+const initThemeState = () => {
+  const appId = getMetaApi(META_SERVICE.GlobalService).getBaseInfo().id
+  const theme =
+    localStorage.getItem(`tiny-engine-theme-${appId}`) || getMergeMeta('engine.config').theme || DEFAULT_THEME.label
+
+  themeChange(theme)
+}
+
 export default () => {
   return {
     THEME_DATA,
     themeState,
+    getTheme,
     initThemeState,
     themeChange
   }

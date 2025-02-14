@@ -1,12 +1,6 @@
 <template>
   <div class="toolbar-theme-switch">
-    <toolbar-base
-      :content="baseContent"
-      :icon="baseIcon"
-      :options="optionsData"
-      :position="position"
-      @click-api="themeChange"
-    >
+    <toolbar-base :content="baseContent" :icon="baseIcon" :options="optionsData" @click-api="themeChange">
       <template v-if="position === 'collapse'">
         <div class="toolbar-theme-switch-radio">
           <div class="toolbar-theme-switch-radio-title">主题</div>
@@ -42,7 +36,8 @@ export default {
   setup(props) {
     const THEME_DATA = useThemeSwitch().THEME_DATA
     const COLLAPSE = 'collapse'
-    const state = useThemeSwitch().initThemeState()
+    useThemeSwitch().initThemeState()
+    const state = useThemeSwitch().themeState
     const optionsData = computed(() => {
       const options = { ...props.options }
       if (props.position === COLLAPSE) {
@@ -59,7 +54,8 @@ export default {
         return
       }
 
-      useThemeSwitch().themeChange()
+      const theme = useThemeSwitch().getTheme(state.theme).oppositeTheme
+      useThemeSwitch().themeChange(theme)
     }
 
     const radioChange = useThemeSwitch().themeChange
@@ -76,11 +72,3 @@ export default {
   }
 }
 </script>
-<style lang="less" scoped>
-.toolbar-theme-switch-radio {
-  height: 44px;
-  .toolbar-theme-switch-radio-title {
-    color: var(--te-toolbar-theme-switch-radio-title);
-  }
-}
-</style>
