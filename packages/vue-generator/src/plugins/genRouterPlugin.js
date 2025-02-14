@@ -87,7 +87,7 @@ const convertToNestedRoutes = (schema) => {
 
   if (home.redirect) {
     home.children = flattenRoutes(result)
-    return home
+    return [home]
   } else {
     return flattenRoutes(result)
   }
