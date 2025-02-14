@@ -410,13 +410,11 @@ const handlePageDetail = async (pages, currentPage) => {
   const { ROOT_ID } = pageSettingState
 
   if (pages.length > 0) {
-    pages = await Promise.all(
+    await Promise.all(
       pages.map(async (page, index) => {
         updatePageContent(page, currentPage)
         await fetchPageDetailIfNeeded(page)
         updateParentId(page, pages, index, ROOT_ID)
-
-        return page
       })
     )
   }
