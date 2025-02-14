@@ -1,10 +1,10 @@
 <template>
   <div class="toolbar-theme-switch">
-    <toolbar-base :content="baseContent" :icon="baseIcon" :options="optionsData" @click-api="themeChange">
+    <toolbar-base :content="baseContent" :icon="baseIcon" :options="optionsData" @click-api="toChangeTheme">
       <template v-if="position === 'collapse'">
         <div class="toolbar-theme-switch-radio">
           <div class="toolbar-theme-switch-radio-title">主题</div>
-          <tiny-radio-group v-model="state.theme" :options="THEME_DATA" class="theme-radio-group" @change="radioChange">
+          <tiny-radio-group v-model="state.theme" :options="THEME_DATA" class="theme-radio-group" @change="themeChange">
           </tiny-radio-group>
         </div>
       </template>
@@ -34,10 +34,9 @@ export default {
     }
   },
   setup(props) {
-    const THEME_DATA = useThemeSwitch().THEME_DATA
     const COLLAPSE = 'collapse'
-    useThemeSwitch().initThemeState()
-    const state = useThemeSwitch().themeState
+    const { themeState: state, THEME_DATA, themeChange, getTheme, initThemeState } = useThemeSwitch()
+    initThemeState()
     const optionsData = computed(() => {
       const options = { ...props.options }
       if (props.position === COLLAPSE) {
@@ -49,16 +48,14 @@ export default {
     const baseContent = computed(() => (props.position === COLLAPSE ? '' : state.themeLabel))
     const baseIcon = computed(() => (props.position === COLLAPSE ? '' : state.theme))
 
-    const themeChange = () => {
+    const toChangeTheme = () => {
       if (props.position === COLLAPSE) {
         return
       }
 
-      const theme = useThemeSwitch().getTheme(state.theme).oppositeTheme
-      useThemeSwitch().themeChange(theme)
+      const theme = getTheme(state.theme).oppositeTheme
+      themeChange(theme)
     }
-
-    const radioChange = useThemeSwitch().themeChange
 
     return {
       THEME_DATA,
@@ -66,8 +63,8 @@ export default {
       optionsData,
       baseContent,
       baseIcon,
-      themeChange,
-      radioChange
+      toChangeTheme,
+      themeChange
     }
   }
 }
