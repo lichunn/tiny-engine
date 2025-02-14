@@ -460,7 +460,7 @@ export default {
 }
 .app-manage-search {
   padding: 0 10px 12px 10px;
-  border-bottom: 1px solid var(--ti-lowcode-plugin-panel-header-border-bottom-color);
+  border-bottom: 1px solid var(--te-block-panel-header-border-color);
 }
 .block-popper {
   .block-group-option-item {
@@ -495,18 +495,18 @@ export default {
   left: -6px;
   right: 0;
   padding: 8px 16px;
-  border-top: 1px solid var(--te-common-border-divider);
-  background-color: var(--te-common-bg-default);
-  color: var(--te-common-text-primary);
+  border-top: 1px solid var(--te-block-panel-footer-border-color);
+  background-color: var(--te-block-panel-footer-bg-color);
+  color: var(--te-block-panel-footer-text-color);
   display: flex;
   justify-content: space-between;
   :deep(.tiny-dropdown) {
-    color: var(--te-common-text-primary);
+    color: var(--te-block-panel-footer-text-color);
     .tiny-dropdown__trigger:not(.tiny-dropdown__caret-button):not(.is-disabled):hover {
-      color: var(--te-common-text-primary);
+      color: var(--te-block-panel-footer-text-color);
     }
     .tiny-dropdown__suffix-inner {
-      color: var(--te-common-icon-secondary);
+      color: var(--te-block-panel-footer-icon-color);
       height: 10px;
     }
   }
@@ -515,12 +515,12 @@ export default {
   }
   .footer-layout {
     font-size: 12px;
-    color: var(--te-common-text-primary);
+    color: var(--te-block-panel-footer-text-color);
     .tiny-svg {
       cursor: pointer;
       margin-left: 8px;
       &.active {
-        color: var(--ti-lowcode-icon-bind-color);
+        color: var(--te-block-panel-footer-bind-icon-color);
       }
     }
   }
@@ -537,8 +537,8 @@ export default {
   &:not(.is-disabled):active,
   &:not(.is-disabled):hover,
   &:focus {
-    background-color: var(--te-common-bg-container);
-    color: var(--te-common-text-primary);
+    background-color: var(--te-block-panel-footer-bg-color-active);
+    color: var(--te-block-panel-footer-text-color);
   }
 }
 :deep(.tiny-dropdown-menu.tiny-popper[x-placement^='top']) {
@@ -551,27 +551,17 @@ export default {
   width: 220px;
   height: 108px;
   box-sizing: border-box;
-  background-color: var(--ti-lowcode-materials-block-group-delete-popover-bg-color);
   padding: 6px;
-
-  &[x-placement^='right'] {
-    .popper__arrow {
-      &,
-      &::after {
-        border-right-color: var(--te-common-bg-container);
-      }
-    }
-  }
 
   .popper-confirm-header {
     font-size: var(--te-base-font-size-1);
-    color: var(--te-common-text-primary);
+    color: var(--te-block-popper-title-text-color);
     font-weight: var(--te-base-font-weight-7);
     margin-bottom: 12px;
   }
   .popper-confirm-content {
     font-size: 12px;
-    color: var(--te-common-text-secondary);
+    color: var(--te-block-popper-content-text-color);
   }
   .popper-confirm-footer {
     text-align: right;
