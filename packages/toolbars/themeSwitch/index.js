@@ -12,7 +12,7 @@
 
 import entry from './src/Main.vue'
 import metaData from './meta'
-import { ThemeSwitchService } from './src/composable'
+import { default as ThemeSwitchService } from './src/composable'
 import './src/styles/vars.less'
 
 export default {

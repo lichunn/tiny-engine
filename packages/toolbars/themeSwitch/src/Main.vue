@@ -16,7 +16,7 @@
 import { computed } from 'vue'
 import { ToolbarBase } from '@opentiny/tiny-engine-common'
 import { RadioGroup } from '@opentiny/vue'
-import useThemeSwitch from './composable/useThemeSwitch.js'
+import { getMetaApi, META_SERVICE } from '@opentiny/tiny-engine-meta-register'
 
 export default {
   components: {
@@ -34,9 +34,10 @@ export default {
     }
   },
   setup(props) {
+    const { getThemeData, getThemeState, themeChange, getTheme } = getMetaApi(META_SERVICE.ThemeSwitch)
+    const state = getThemeState()
+    const THEME_DATA = getThemeData()
     const COLLAPSE = 'collapse'
-    const { themeState: state, THEME_DATA, themeChange, getTheme, initThemeState } = useThemeSwitch()
-    initThemeState()
     const optionsData = computed(() => {
       const options = { ...props.options }
       if (props.position === COLLAPSE) {
