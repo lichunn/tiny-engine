@@ -3,9 +3,6 @@ export default {
   type: 'toolbars',
   title: 'themeSwitch',
   options: {
-    icon: {
-      default: 'light'
-    },
     renderType: 'icon'
   }
 }
