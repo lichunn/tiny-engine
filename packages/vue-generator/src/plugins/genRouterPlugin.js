@@ -39,15 +39,14 @@ const flattenRoutes = (routes, parentPath = '') => {
 const convertToNestedRoutes = (schema) => {
   const pageSchema = (schema.pageSchema || []).sort((a, b) => a.meta?.router?.length - b.meta?.router?.length)
   const result = []
-  let home = {}
+  let home = {
+    path: '/'
+  }
   let isGetHome = false
 
   pageSchema.forEach((item) => {
     if ((item.meta?.isHome || item.meta?.isDefault) && !isGetHome) {
-      home = {
-        path: '/',
-        redirect: { name: `${item.meta.id}` }
-      }
+      home.redirect = { name: `${item.meta.id}` }
       isGetHome = true
     }
 
@@ -85,12 +84,8 @@ const convertToNestedRoutes = (schema) => {
     })
   })
 
-  if (home.redirect) {
-    home.children = flattenRoutes(result)
-    return [home]
-  } else {
-    return flattenRoutes(result)
-  }
+  home.children = flattenRoutes(result)
+  return [home]
 }
 
 // 示例路由数组
