@@ -12,8 +12,17 @@
 
 <script>
 import { previewPage, previewBlock } from '@opentiny/tiny-engine-common/js/preview'
-import { useBlock, useCanvas, useLayout, useNotify, usePage } from '@opentiny/tiny-engine-meta-register'
-import { getMergeMeta, getOptions, META_SERVICE, getMetaApi } from '@opentiny/tiny-engine-meta-register'
+import {
+  useBlock,
+  useCanvas,
+  useLayout,
+  useNotify,
+  usePage,
+  getMergeMeta,
+  getOptions,
+  META_SERVICE,
+  getMetaApi
+} from '@opentiny/tiny-engine-meta-register'
 import meta from '../meta'
 import { ToolbarBase } from '@opentiny/tiny-engine-common'
 

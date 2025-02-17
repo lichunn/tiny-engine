@@ -44,7 +44,8 @@ import {
   Layout,
   Canvas,
   GenerateCodeService,
-  GlobalService
+  GlobalService,
+  ThemeSwitchService
 } from '@opentiny/tiny-engine'
 import engineConfig from './engine.config'
 import { HttpService } from './src/composable'
@@ -52,7 +53,7 @@ import { HttpService } from './src/composable'
 export default {
   root: {
     id: 'engine.root',
-    metas: [HttpService, GenerateCodeService, GlobalService] // GlobalService 依赖 HttpService，HttpService需要在前面处理
+    metas: [HttpService, GenerateCodeService, GlobalService, ThemeSwitchService] // GlobalService 依赖 HttpService，HttpService需要在前面处理
   },
   config: engineConfig,
   layout: {

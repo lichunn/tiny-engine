@@ -17,8 +17,7 @@ import './src/styles/vars.less'
 
 export default {
   ...metaData,
-  entry,
-  metas: [ThemeSwitchService]
+  entry
 }
 
 export { ThemeSwitchService }
