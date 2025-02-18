@@ -308,12 +308,12 @@ export default {
     height: calc(100% - 38px);
     overflow-y: scroll;
     padding-top: 12px;
-    border-top: 1px solid var(--ti-lowcode-tree-border-color);
+    border-top: 1px solid var(--te-tree-border-color);
 
     .tree-handle {
       font-size: var(--te-base-font-size-2);
       svg {
-        fill: var(--te-common-icon-secondary);
+        fill: var(--te-tree-icon-color);
       }
     }
   }
@@ -340,14 +340,14 @@ export default {
     line-height: inherit;
   }
   :deep(.high-light-node) {
-    background: var(--te-common-bg-container) !important;
+    background: var(--te-tree-bg-color-active) !important;
 
     :deep(.eyeOpen) {
       display: block !important;
     }
   }
   :deep(.tiny-grid .tiny-grid__body-wrapper .tiny-grid-body__column) {
-    color: var(--te-common-text-primary);
+    color: var(--te-tree-text-color);
     padding: 0 12px;
     height: 24px !important;
     line-height: 24px;
@@ -355,7 +355,7 @@ export default {
       font-size: 12px;
     }
     .node-isblock {
-      color: var(--te-common-color-prompt-secondary);
+      color: var(--te-tree-block-text-color);
     }
   }
 }
