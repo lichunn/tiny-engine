@@ -22,7 +22,7 @@ export default {
   },
   emits: ['restorePage'],
   setup(props, { emit }) {
-    const { pageSettingState } = usePage()
+    const { pageSettingState, getFamily } = usePage()
     const { getDateFromNow } = useBlock()
     const { confirm } = useModal()
     const list = ref([])
@@ -52,9 +52,10 @@ export default {
       getHistoryList(pageId)
     })
 
-    const previewHistory = (item) => {
-      item &&
-        previewPage({
+    const previewHistory = async (item) => {
+      if (item) {
+        const theme = getMetaApi(META_SERVICE.ThemeSwitch)?.getThemeState()?.theme
+        const params = {
           id: item.page,
           history: item.id,
           framework: getMergeMeta('engine.config')?.dslMode,
@@ -62,8 +63,11 @@ export default {
           pageInfo: {
             name: item.name
           },
-          ancestors: [item]
-        })
+          theme
+        }
+        params.ancestors = await getFamily(params)
+        previewPage(params)
+      }
     }
 
     const restoreHistory = (item) => {
