@@ -56,12 +56,13 @@ export default {
       if (item) {
         const theme = getMetaApi(META_SERVICE.ThemeSwitch)?.getThemeState()?.theme
         const params = {
-          id: item.page,
+          id: Number(item.page),
           history: item.id,
           framework: getMergeMeta('engine.config')?.dslMode,
           platform: getMergeMeta('engine.config')?.platformId,
           pageInfo: {
-            name: item.name
+            name: item.name,
+            schema: item.page_content
           },
           theme
         }
