@@ -54,7 +54,7 @@ export default class AiService {
 
     // 连接 MCP 服务器
     // const serverScriptPath = process.env.MCP_SERVER_SCRIPT_PATH;
-    const serverScriptPath = '/Users/chiling/Code/tiny-engine/mcp-server/weather/build/index.js'
+    const serverScriptPath = '/Users/wanglichun/vscodd-project/tiny-engine/mcp-server/weather/build/index.js'
     if (!serverScriptPath) {
       console.log('未配置 MCP 服务器脚本路径，跳过初始化 MCP 客户端');
       return;
