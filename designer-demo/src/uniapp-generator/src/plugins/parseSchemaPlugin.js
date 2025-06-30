@@ -46,7 +46,6 @@ function parseSchema() {
       }
 
       schema.pageSchema = resPageTree
-      debugger;
     }
   }
 }

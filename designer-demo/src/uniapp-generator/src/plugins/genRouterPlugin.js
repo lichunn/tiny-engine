@@ -83,7 +83,6 @@ const convertToUniappPages = (schema) => {
     pages.unshift(homePage)
   }
 
-  debugger
   return { pages, tabBar }
 }
 

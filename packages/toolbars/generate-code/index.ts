@@ -14,15 +14,10 @@ import entry from './src/Main.vue'
 import metaData from './meta'
 import { SaveLocalService } from './src/composable'
 import './src/styles/vars.less'
-import { GenerateCodeService } from '@opentiny/tiny-engine'
 
 export default {
   ...metaData,
   entry,
-  options: {
-    ...metaData.options,
-    generateAppCode: GenerateCodeService.apis?.generateAppCode
-  },
   metas: [SaveLocalService]
 }
 

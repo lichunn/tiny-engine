@@ -87,7 +87,7 @@ export default {
       }
     }
 
-    const { getAllNestedBlocksSchema } = getMetaApi('engine.service.generateCode')
+    const { getAllNestedBlocksSchema, generateAppCode } = getMetaApi('engine.service.generateCode')
 
     const getAllPageDetails = async (pageList) => {
       const detailPromise = pageList.map(({ id }) => getMetaApi(META_APP.AppManage).getPageById(id))
@@ -164,7 +164,9 @@ export default {
         }
       }
 
-      const res = await props.options?.generateAppCode(appSchema)
+      const res = await (props.options?.generateAppCode
+        ? props.options.generateAppCode(appSchema)
+        : generateAppCode(appSchema))
 
       const { genResult = [] } = res || {}
       const fileRes = genResult.map(({ fileContent, fileName, path, fileType }) => {

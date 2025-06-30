@@ -206,7 +206,6 @@ const generateSFCFile = (schema, componentsMap, config = {}, nextPage) => {
     { ...parsedConfig, componentsMap: componentsMap },
     nextPage
   )
-  // debugger
 
   // 生成 script
   const scriptStr = genScriptByHook(schema, globalHooks, { ...parsedConfig, componentsMap: componentsMap }, nextPage)
