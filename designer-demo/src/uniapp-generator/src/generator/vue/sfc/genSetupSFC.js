@@ -31,7 +31,6 @@ import {
   parsePropsHook,
   parseReactiveStateHook,
   addDefaultVueImport,
-  addDefaultVueI18nImport,
   handleProvideStatesContextHook,
   handleContextInjectHook,
   defaultGenImportHook,
@@ -240,7 +239,6 @@ export const genUniappSFCWithDefaultPlugin = (schema, componentsMap, config = {}
 
   const defaultParseScriptHook = [
     addDefaultVueImport,
-    addDefaultVueI18nImport,
     parsePropsHook,
     parseReactiveStateHook,
     handleProvideStatesContextHook,

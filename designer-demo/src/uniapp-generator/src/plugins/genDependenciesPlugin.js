@@ -73,22 +73,21 @@ function genDependenciesPlugin(options = {}) {
      * @returns
      */
     run(schema) {
-      const dependencies = parseSchema(schema)
+      // const dependencies = parseSchema(schema)
       const originPackageItem = this.getFile(path, fileName)
 
-      if (!originPackageItem) {
-        return {
-          fileName,
-          path,
-          fileContent: JSON.stringify({ dependencies })
-        }
-      }
+      // if (!originPackageItem) {
+      //   return {
+      //     fileName,
+      //     path,
+      //     fileContent: JSON.stringify({ dependencies })
+      //   }
+      // }
 
       let originPackageJSON = JSON.parse(originPackageItem.fileContent)
 
       originPackageJSON.dependencies = {
-        ...originPackageJSON.dependencies,
-        ...dependencies
+        ...originPackageJSON.dependencies
       }
 
       this.addFile({ fileType: 'json', fileName, path, fileContent: JSON.stringify(originPackageJSON) }, true)

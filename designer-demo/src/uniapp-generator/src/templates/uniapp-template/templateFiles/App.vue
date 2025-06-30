@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import { onLaunch, onShow, onHide } from "@dcloudio/uni-app";
-import { I18nInjectionKey } from 'vue-i18n'
-import { provide } from 'vue'
 import i18n from './i18n'
-
-provide(I18nInjectionKey, i18n)
-
 
 onLaunch(() => {
   console.log("App Launch");

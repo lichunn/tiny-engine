@@ -7,10 +7,12 @@ import { hasJsx } from '../../../utils/hasJsx'
 
 export const defaultGenImportHook = (schema, globalHooks, config, nextPage) => {
   const dependenciesMap = globalHooks.getImport() || {}
-  const importContent = Object.entries(dependenciesMap).map(([key, value]) => {
+  const importContent = Object.entries(dependenciesMap).map(([key, value]) => {   
     return generateImportByPkgName({ pkgName: key, imports: value }) || ''
   })
 
+  importContent.push(`import i18n from "@/i18n"`)
+  
   if (nextPage) {
     importContent.push(`import ${nextPage} from "./${nextPage}.vue"`)
   }
@@ -119,7 +121,6 @@ export const handleProvideStatesContextHook = (schema, globalHooks) => {
 }
 
 export const handleContextInjectHook = (schema, globalHooks) => {
-  const inject = 'const i18n = vue.inject(I18nInjectionKey);'
   const injectI18n = 'const { t } = i18n;'
   const injectLowcode = 'const { bridge, eventBus, dataSourceManager, config } = i18n.lowcode;'
   // const injectLowcodeWrap = 'const wrap = lowcodeWrap(props, { emit })'
@@ -128,7 +129,7 @@ export const handleContextInjectHook = (schema, globalHooks) => {
   globalHooks.addStatement({
     key: 'tiny-engine-inject-statement',
     position: INSERT_POSITION.AFTER_EMIT,
-    value: `${inject}\n${injectI18n}\n${injectLowcode}\n`
+    value: `${injectI18n}\n${injectLowcode}\n`
   })
 }
 
@@ -153,10 +154,10 @@ export const addDefaultVueImport = (schema, globalHooks) => {
 }
 
 export const addDefaultVueI18nImport = (schema, globalHooks) => {
-  globalHooks.addImport('vue-i18n', {
+  globalHooks.addImport('@/i18n', {
     destructuring: true,
-    exportName: 'I18nInjectionKey',
-    componentName: 'I18nInjectionKey'
+    exportName: 'i18n',
+    componentName: 'i18n'
   })
 }
 

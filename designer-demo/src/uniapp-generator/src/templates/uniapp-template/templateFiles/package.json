@@ -54,7 +54,7 @@
     "@dcloudio/uni-quickapp-webview": "3.0.0-alpha-4070220250618001",
     "@opentiny/tiny-engine-i18n-host": "^2.6.0",
     "vue": "3.4.21",
-    "vue-i18n": "^9.14.4"
+    "vue-i18n": "9.14.4"
   },
   "devDependencies": {
     "@dcloudio/types": "3.4.15",
