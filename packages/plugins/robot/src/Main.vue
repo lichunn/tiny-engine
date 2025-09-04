@@ -132,6 +132,7 @@ import {
 import type { BubbleRoleConfig, PromptProps } from '@opentiny/tiny-robot'
 import { IconNewSession } from '@opentiny/tiny-robot-svgs'
 import SchemaRenderer from '@opentiny/tiny-schema-renderer'
+import { utils } from '@opentiny/tiny-engine-utils'
 import RobotSettingPopover from './RobotSettingPopover.vue'
 import {
   getBlockContent,
@@ -146,7 +147,7 @@ import {
 } from './js/robotSetting'
 import { PROMPTS } from './js/prompts'
 import * as jsonpatch from 'fast-json-patch'
-import { chatStream } from './js/utils'
+import { chatStream, checkComponentNameExists } from './js/utils'
 import McpServer from './mcp/McpServer.vue'
 import useMcpServer from './mcp/useMcp'
 import MarkdownRenderer from './mcp/MarkdownRenderer.vue'
@@ -154,6 +155,9 @@ import LoadingRenderer from './mcp/LoadingRenderer.vue'
 import { sendMcpRequest, serializeError } from './mcp/utils'
 import type { RobotMessage } from './mcp/types'
 import RobotTypeSelect from './RobotTypeSelect.vue'
+import { jsonrepair } from 'jsonrepair'
+import { testJson } from './test.js'
+let intervalId = null
 
 export default {
   components: {
@@ -196,6 +200,7 @@ export default {
     const MESSAGE_TIP = '已生成新的页面效果，请点击下方按钮应用schema'
     const aiType = ref(TALK_TYPE)
     const chatContainerRef = ref(null)
+    const { deepClone, string2Obj, reactiveObj2String: obj2String } = utils
     const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
     watchEffect(() => {
       avatarUrl.value = 'img/defaultAvator.png'
@@ -280,15 +285,20 @@ export default {
       id
     })
 
-    const setSchema = () => {
-      const value = {
-        ...pageState.pageSchema,
-        ...currentSchema.value,
-        componentName: pageState.pageSchema.componentName
+    const setSchema = async (schema: any) => {
+      try {
+        const value = {
+          ...pageState.pageSchema,
+          ...schema,
+          componentName: pageState.pageSchema.componentName
+        }
+        importSchema(value)
+        setSaved(false)
+        showPreview.value = false
+        await nextTick()
+      } catch (error) {
+        console.log('setschema error', error)
       }
-      importSchema(value)
-      setSaved(false)
-      showPreview.value = false
     }
 
     // 处理响应
@@ -300,6 +310,7 @@ export default {
 
           if (match && match[1] && JSON.parse(match[1]) && isValidFastJsonPatch(JSON.parse(match[1]))) {
             const newValue = JSON.parse(match[1])
+            console.log('jsonpatch', newValue)
             // 使用 applyPatch 修改 Schema
             const result = newValue.reduce(jsonpatch.applyReducer, pageState.pageSchema)
 
@@ -369,6 +380,9 @@ export default {
 
         let streamContent = ''
         const chatId = Date.now().toString()
+        const currentJson = deepClone(pageState.pageSchema)
+        let lastExecutionTime = 0
+        const throttleDelay = 3000 // 节流时间间隔，单位毫秒
         await chatStream(
           {
             requestUrl: '/app-center/api/ai/chat',
@@ -384,8 +398,76 @@ export default {
                 if (streamContent !== messages.value[messages.value.length - 1].content) {
                   messages.value[messages.value.length - 1].content = ''
                 }
+                // 清除现有定时器
+                // let chunkIndex = 0
+                // let active = true
+                // let lastExecutionTime = 0
+                // const throttleDelay = 3600 // 节流时间间隔，单位毫秒
+
+                // if (intervalId) {
+                //   clearInterval(intervalId)
+                // }
+                // intervalId = setInterval(() => {
+                //   if (!active) return
+
+                //   if (chunkIndex < testJson.length) {
+                //     // 添加新的JSON数据块
+                //     const chunk = testJson[chunkIndex]
+                //     streamContent += chunk
+                //     console.log('streamContent', streamContent)
+                //     chunkIndex++
+                //     const currentTime = Date.now()
+                //     if (currentTime - lastExecutionTime < throttleDelay) {
+                //       return // 节流，跳过本次执行
+                //     }
+                //     try {
+                //       const repaired = jsonrepair(streamContent)
+                //       const parsedJson = JSON.parse(repaired)
+                //       const result = parsedJson.reduce((acc, patch) => {
+                //         return jsonpatch.applyPatch(acc, [patch], false, false).newDocument
+                //       }, currentJson)
+                //       const editorValue = string2Obj(obj2String(result))
+                //       if (editorValue && checkComponentNameExists(result)) {
+                //         setSchema(result)
+                //       }
+
+                //       console.log('JSON修复成功!', editorValue, parsedJson, result)
+                //       // debugger
+                //     } catch (error) {
+                //       // 修复失败，继续等待更多数据
+                //       console.log('接收不完整JSON，等待更多数据...', error)
+                //       // debugger
+                //     }
+                //     lastExecutionTime = currentTime // 更新最后执行时间
+                //   } else {
+                //     // 所有数据块发送完成
+                //     active = false
+                //   }
+                // }, 1000 / 5)
+
                 streamContent += choice.delta.content
                 messages.value[messages.value.length - 1].content += choice.delta.content
+                const currentTime = Date.now()
+                if (currentTime - lastExecutionTime > throttleDelay) {
+                  try {
+                    const repaired = jsonrepair(streamContent)
+                    const parsedJson = JSON.parse(repaired)
+                    const result = parsedJson.reduce((acc, patch) => {
+                      return jsonpatch.applyPatch(acc, [patch], false, false).newDocument
+                    }, currentJson)
+                    const editorValue = string2Obj(obj2String(result))
+
+                    if (editorValue && checkComponentNameExists(result)) {
+                      setSchema(result)
+                    }
+
+                    console.log('JSON修复成功!', editorValue, parsedJson, result)
+                  } catch (error) {
+                    // 修复失败，继续等待更多数据
+                    console.log('接收不完整JSON，等待更多数据...', error)
+                  }
+                  lastExecutionTime = currentTime // 更新最后执行时间
+                }
               }
             },
             onError: (error) => {
@@ -740,7 +822,7 @@ export default {
                   showPreview.value = true
                 }
                 if (name === 'run') {
-                  setSchema()
+                  setSchema(currentSchema.value)
                 }
               }
             })
