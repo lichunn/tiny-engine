@@ -5,8 +5,8 @@ import type {
   StreamHandler,
   AIAdapterError
 } from '@opentiny/tiny-robot-kit'
-import { BaseModelProvider, handleSSEStream, ErrorType } from '@opentiny/tiny-robot-kit'
-import { formatMessages } from '../utils'
+import { BaseModelProvider, ErrorType, sseStreamToGenerator } from '@opentiny/tiny-robot-kit'
+import { formatMessages, processSSEStream } from '../utils'
 
 interface AxiosRequestConfig {
   url: string
@@ -346,11 +346,17 @@ export class OpenAICompatibleProvider extends BaseModelProvider {
         const fetchResponse = (
           (response as { data: { response: Response } }).data || (response as { response: Response })
         ).response
-        await handleSSEStream(fetchResponse, handler, signal)
+        const streamGenerator = sseStreamToGenerator(fetchResponse.body!)
+        for await (const chunk of streamGenerator) {
+          processSSEStream(chunk, handler)
+        }
       } else {
         // 使用 fetch 发送流式请求
         const response = await this.sendFetchRequest(requestData, headers, { signal, apiUrl })
-        await handleSSEStream(response, handler, signal)
+        const streamGenerator = sseStreamToGenerator(response.body!)
+        for await (const chunk of streamGenerator) {
+          processSSEStream(chunk, handler)
+        }
       }
     } catch (error: unknown) {
       // 如果是用户主动取消，不报错

@@ -74,7 +74,7 @@ export interface ModeHooks {
     finishReason: string,
     content: string,
     messages: any[],
-    context: { abortControllerMap: Record<string, AbortController> }
+    context: { abortControllerMap: Record<string, AbortController>; messageState?: any }
   ) => Promise<void>
 
   /** 会话结束 */

@@ -62,12 +62,19 @@ export default function useChatMode(): ModeHooks {
 
   // ========== 生命周期钩子 ==========
   const onConversationStart = (conversationState: any, messages: any[], apis: any) => {
-    const conversation = conversationState.conversations.find((item: any) => item.id === conversationState.currentId)
+    const currentId = conversationState.currentId
+    if (!currentId) return
+
+    const conversation = conversationState.conversations.find((item: any) => item.id === currentId)
+    if (!conversation) return
 
     // 确保会话元数据中记录为 Chat 模式
     if (!conversation.metadata?.chatMode || conversation.metadata.chatMode !== ChatMode.Chat) {
-      apis.updateMetadata(conversationState.currentId, { chatMode: ChatMode.Chat })
-      apis.saveConversations()
+      apis.updateMetadata(currentId, { chatMode: ChatMode.Chat })
+      // 0.4.x 中可能不再有 saveConversations 方法，改为可选调用
+      if (typeof apis.saveConversations === 'function') {
+        apis.saveConversations()
+      }
     }
 
     // Chat 模式简单移除 loading
@@ -103,7 +110,18 @@ export default function useChatMode(): ModeHooks {
   }
 
   const onStreamStart = (messages: any[]) => {
-    removeLoading(messages)
+    // 0.4.x 迁移：需要手动创建 assistant 消息并设置 loading 类型
+    const lastMessage = messages.at(-1)
+    if (lastMessage?.role === 'assistant') {
+      // 确保 renderContent 存在并设置为 loading 类型
+      if (!lastMessage.renderContent || !Array.isArray(lastMessage.renderContent)) {
+        lastMessage.renderContent = []
+      }
+      // 如果当前没有 renderContent 或 renderContent 为空，添加 loading 类型
+      if (lastMessage.renderContent.length === 0) {
+        lastMessage.renderContent.push({ type: getLoadingType(), content: '' })
+      }
+    }
   }
 
   const onStreamData = (_data: object, _content: string | object, _messages: any[]) => {
@@ -140,7 +158,8 @@ export default function useChatMode(): ModeHooks {
   }
 
   const onPostCallTools = (_toolsResult: Record<string, unknown>[], { currentMessage }: { currentMessage: any }) => {
-    currentMessage.renderContent.push({ type: getLoadingType(), content: '' })
+    // 0.4.x 迁移：确保使用正确的 loading 类型
+    currentMessage.renderContent.push({ type: 'loading', content: '' })
   }
 
   const onMessageProcessed = async (

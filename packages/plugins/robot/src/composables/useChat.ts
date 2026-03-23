@@ -1,7 +1,8 @@
-import { nextTick, ref } from 'vue'
-import { GeneratingStatus, STATUS, type ChatMessage, type MessageState } from '@opentiny/tiny-robot-kit'
+import { nextTick, ref, computed } from 'vue'
+import { type ChatMessage } from '@opentiny/tiny-robot-kit'
+import { GeneratingStatus, STATUS, type MessageState } from '../constants/status'
 import { formatMessages, removeLoading } from '../utils'
-import { getClientConfig as getConfig, updateClientConfig as updateConfig, client } from '../services/aiClient'
+import { getClientConfig as getConfig, updateClientConfig as updateConfig } from '../services/aiClient'
 import useModelConfig from './core/useConfig'
 import useMode from './modes/useMode'
 import { createStreamDataHandler } from './core/useMessageStream'
@@ -14,7 +15,6 @@ const {
   // 配置方法
   getApiUrl,
   getContentType,
-  getLoadingType,
   // 生命周期钩子
   onConversationStart,
   onMessageSent,
@@ -33,6 +33,8 @@ const {
 const { robotSettingState, updateChatModeState, getSelectedModelInfo } = useModelConfig()
 
 // 本次对话的状态，从用户发送消息开始到AI返回或用户主动终止结束
+// 注意：0.4.x 中使用 STATUS 枚举，保持兼容
+// CHAT_STATUS 仅用于内部逻辑映射，实际使用 STATUS 枚举值
 enum CHAT_STATUS {
   PROCESSING = 'processing', // 本轮对话开始后，没有请求在流式返回（可能是等待请求，也可能是请求间隙）
   STREAMING = 'streaming', // 当前有请求正在流式返回
@@ -54,10 +56,51 @@ const handleStreamData = createStreamDataHandler({
   statusManager: {
     isStreaming: () => chatStatus.value === CHAT_STATUS.STREAMING,
     setStreaming: () => {
-      chatStatus.value = CHAT_STATUS.STREAMING
+      // 状态由 useConversationAdapter 统一管理
     }
   }
 })
+
+const handleFinishRequest = async (
+  finishReason: string,
+  messages: ChatMessage[],
+  contextMessages: ChatMessage[],
+  messageState: MessageState
+) => {
+  const lastMessage = messages.at(-1)
+
+  delete abortControllerMap.main
+  await onRequestEnd(finishReason, lastMessage?.content || '', messages) // 本次请求结束
+
+  // 部分模型返回格式不太标准，例如finishReason没有返回tool_calls而是stop，这里做下兼容
+  if (['tool_calls', 'stop'].includes(finishReason) && lastMessage?.tool_calls?.length) {
+    lastMessage.tool_calls.forEach((toolCall) => {
+      if (toolCall.type !== 'function') {
+        // 修复，兼容部分场景返回格式不标准，流式中多次返回type字段
+        toolCall.type = 'function'
+      }
+    })
+    await handleToolCall(lastMessage.tool_calls, messages, contextMessages) // eslint-disable-line
+  }
+
+  if (finishReason === 'aborted' || messageState?.status === STATUS.ABORTED) {
+    messageState.status = STATUS.ABORTED
+    chatStatus.value = CHAT_STATUS.FINISHED
+  } else if (finishReason === 'stop' && !lastMessage?.tool_calls) {
+    messageState.status = STATUS.FINISHED
+    chatStatus.value = CHAT_STATUS.FINISHED
+    await onMessageProcessed(finishReason, lastMessage?.content ?? '', messages, {
+      abortControllerMap: {}
+    })
+  }
+}
+
+const handleRequestError = async (_error: Error, messages: ChatMessage[], messageState: MessageState) => {
+  chatStatus.value = CHAT_STATUS.FINISHED
+  delete abortControllerMap.main
+  await onRequestEnd('error', messages.at(-1)?.content || '', messages) // 本次请求结束
+  messageState.status = STATUS.ERROR
+}
 
 const beforeRequest = async (params: ChatRequestData): Promise<ChatRequestData> => {
   const requestParams = await onBeforeRequest(params)
@@ -86,44 +129,6 @@ const initChatClient = () => {
   updateConfig(config)
 }
 
-const handleFinishRequest = async (
-  finishReason: string,
-  messages: ChatMessage[],
-  contextMessages: ChatMessage[],
-  messageState: MessageState
-) => {
-  const lastMessage = messages.at(-1)
-
-  delete abortControllerMap.main
-  await onRequestEnd(finishReason, lastMessage.content, messages) // 本次请求结束
-
-  // 部分模型返回格式不太标准，例如finishReason没有返回tool_calls而是stop，这里做下兼容
-  if (['tool_calls', 'stop'].includes(finishReason) && lastMessage.tool_calls?.length) {
-    lastMessage!.tool_calls.forEach((toolCall) => {
-      if (toolCall.type !== 'function') {
-        // 修复，兼容部分场景返回格式不标准，流式中多次返回type字段
-        toolCall.type = 'function'
-      }
-    })
-    await handleToolCall(lastMessage.tool_calls, messages, contextMessages) // eslint-disable-line
-  }
-
-  if (finishReason === 'aborted' || messageState?.status === STATUS.ABORTED) {
-    messageState.status = STATUS.ABORTED
-  } else if (finishReason === 'stop' && !lastMessage.tool_calls) {
-    messageState.status = STATUS.FINISHED
-    chatStatus.value = CHAT_STATUS.FINISHED
-    await onMessageProcessed(finishReason, lastMessage.content ?? '', messages.value, {})
-  }
-}
-
-const handleRequestError = async (error: Error, messages: ChatMessage[], messageState: MessageState) => {
-  chatStatus.value = CHAT_STATUS.FINISHED
-  delete abortControllerMap.main
-  await onRequestEnd('error', messages.at(-1).content, messages, { error }) // 本次请求结束
-  messageState.status = STATUS.ERROR
-}
-
 // 使用 conversation 适配器，将业务逻辑与 conversation 管理解耦
 const {
   messageManager,
@@ -133,16 +138,15 @@ const {
   autoSetTitle: autoSetTitleBase,
   ...conversationMethods
 } = useConversationAdapter({
-  client,
   onStreamData: handleStreamData,
   onFinishRequest: handleFinishRequest,
   onMessageProcessed: async (finishReason, content, messages) => {
     await onMessageProcessed(finishReason, content, messages, {
       abortControllerMap,
-      messageState: messageManager.messageState
+      messageState: messageManager.messageState.value
     })
-    if (GeneratingStatus.includes(messageManager.messageState.status)) {
-      messageManager.messageState.status = STATUS.FINISHED
+    if (GeneratingStatus.includes(messageManager.messageState.value.status)) {
+      messageManager.messageState.value.status = STATUS.FINISHED
     }
     chatStatus.value = CHAT_STATUS.FINISHED
   },
@@ -153,13 +157,28 @@ const {
     },
     resetProcessing: () => {
       chatStatus.value = CHAT_STATUS.FINISHED
+    },
+    setStreaming: () => {
+      chatStatus.value = CHAT_STATUS.STREAMING
+    },
+    setFinished: () => {
+      chatStatus.value = CHAT_STATUS.FINISHED
     }
+  },
+  getContentType,
+  onBeforeRequest,
+  getProviderConfig: () => {
+    const { service, model } = getSelectedModelInfo()
+    return {
+      apiKey: service?.apiKey || getConfig()?.apiKey,
+      apiUrl: getApiUrl(),
+      defaultModel: model || 'deepseek-v3'
+    } as ProviderConfig
   }
 })
 
 // 使用工厂函数创建工具调用处理器
 const handleToolCall = createToolCallHandler({
-  client,
   getAbortController: () => {
     abortControllerMap.toolCall = new AbortController()
     return abortControllerMap.toolCall
@@ -175,7 +194,7 @@ const handleToolCall = createToolCallHandler({
     onError: handleRequestError,
     onDone: handleFinishRequest
   },
-  getMessageState: () => messageManager.messageState,
+  getMessageState: () => messageManager.messageState.value,
   statusManager: {
     isProcessing: () => chatStatus.value === CHAT_STATUS.PROCESSING,
     setProcessing: () => {
@@ -189,58 +208,62 @@ const handleToolCall = createToolCallHandler({
 
 // 包装 conversation 方法，添加业务特定逻辑
 const createConversation = (title = '新会话', chatMode = robotSettingState.chatMode) => {
-  const currentConversationId = conversationState.currentId!
+  const currentConversationId = conversationState.value?.currentId
   const newConversationId = createConversationBase(title, { chatMode })
-  if (newConversationId !== currentConversationId) {
+  if (currentConversationId && newConversationId !== currentConversationId) {
     onConversationEnd(currentConversationId)
   }
-  onConversationStart(conversationState, messageManager.messages.value, conversationMethods)
+  onConversationStart(conversationState.value, messageManager.messages.value, conversationMethods)
   return newConversationId
 }
 
 const switchConversation = (conversationId: string) => {
-  onConversationEnd(conversationState.currentId!)
+  const currentId = conversationState.value?.currentId
+  if (currentId) {
+    onConversationEnd(currentId)
+  }
   return switchConversationBase(conversationId, (state, messages, methods) => {
     onConversationStart(state, messages, methods)
   })
 }
 
 const autoSetTitle = () => {
-  if (conversationState.currentId) {
-    autoSetTitleBase(conversationState.currentId)
-  }
+  autoSetTitleBase()
 }
 
 const addMainAbortController = () => {
   const mainAbortController = new AbortController()
   mainAbortController.signal.addEventListener('abort', () => {
     messageManager.abortRequest()
-    messageManager.messageState.status = STATUS.ABORTED
+    messageManager.messageState.value.status = STATUS.ABORTED
+    chatStatus.value = CHAT_STATUS.FINISHED
   })
   abortControllerMap.main = mainAbortController
 }
 
-const addLoading = (messages: ChatMessage[]) => {
-  const assistantMessage: ChatMessage = {
-    role: 'assistant',
-    content: '',
-    renderContent: [{ type: getLoadingType() }]
-  }
-  messages.push(assistantMessage)
-}
+// const addLoading = (messages: ChatMessage[]) => {
+  // 0.4.x 中，loading 消息通过插件自动管理，不再需要手动添加
+  // 保留此函数用于向后兼容
+// }
 
 const sendUserMessage = async () => {
   onMessageSent()
   await nextTick()
   addMainAbortController()
-  addLoading(messageManager.messages.value)
+
+  // 设置处理中状态
+  chatStatus.value = CHAT_STATUS.PROCESSING
+
+  // 0.4.x 中，用户消息应该已经通过 UI 手动添加到 messages 数组
+  // 调用 engine.send() 会自动创建 assistant 消息并处理流式响应
   await messageManager.send()
-  if (messageManager.messageState.status === STATUS.ERROR) {
+
+  if (messageManager.messageState.value.status === STATUS.ERROR) {
     removeLoading(messageManager.messages.value)
     await handleRequestError(
-      messageManager.messageState.errorMsg,
+      messageManager.messageState.value.errorMsg,
       messageManager.messages.value,
-      messageManager.messageState
+      messageManager.messageState.value
     )
   }
   autoSetTitle()
@@ -258,20 +281,37 @@ const abortRequest = () => {
 
 const changeChatMode = (chatMode: string) => {
   // 空会话更新metadata
-  const usedConversationId = conversationState.currentId
+  const usedConversationId = conversationState.value?.currentId
   const newConversationId = createConversation('新会话', chatMode)
-  if (usedConversationId === newConversationId) {
-    conversationMethods.updateMetadata(newConversationId, { chatMode })
-    conversationMethods.saveConversations()
+  if (usedConversationId && usedConversationId === newConversationId) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (conversationMethods as any).updateMetadata(newConversationId, { chatMode })
+    // 0.4.x 中可能不再有 saveConversations 方法，改为可选调用
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (typeof (conversationMethods as any).saveConversations === 'function') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (conversationMethods as any).saveConversations()
+    }
   }
 
   updateChatModeState(chatMode)
   updateConfig({ apiUrl: getApiUrl() })
 }
 
+// 将 CHAT_STATUS 映射到 STATUS 枚举，用于 UI 显示
+const mappedStatus = computed(() => {
+  const statusMap: Record<CHAT_STATUS, STATUS> = {
+    [CHAT_STATUS.PROCESSING]: STATUS.PENDING,
+    [CHAT_STATUS.STREAMING]: STATUS.STREAMING,
+    [CHAT_STATUS.FINISHED]: STATUS.FINISHED
+  }
+  return statusMap[chatStatus.value] || STATUS.FINISHED
+})
+
 export default function () {
   return {
     chatStatus,
+    mappedStatus,
     initChatClient,
     updateConfig,
     ...messageManager,

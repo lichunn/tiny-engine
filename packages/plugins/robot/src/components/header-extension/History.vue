@@ -11,7 +11,7 @@
         @click="showHistory = false"
       />
       <tr-history
-        :selected="props.conversationState.currentId || undefined"
+        :selected="(('value' in props.conversationState ? props.conversationState.value : props.conversationState)?.currentId) || undefined"
         :search-bar="true"
         :data="conversationsData"
         @item-action="handleHistoryItemAction"
@@ -35,7 +35,14 @@ import { computed, ref } from 'vue'
 const showHistory = ref(false)
 
 interface HistoryProps {
+  // 0.4.x 中 conversationState 是一个 computed ref
   conversationState: {
+    value: {
+      currentId?: string | null
+      conversations: Conversation[]
+    }
+  } | {
+    // 兼容旧版本
     currentId?: string | null
     conversations: Conversation[]
   }
@@ -81,7 +88,9 @@ const convertFlatToGrouped = (flatData: Conversation[]): Array<{ group: string; 
 }
 
 const conversationsData = computed(() => {
-  return convertFlatToGrouped(props.conversationState.conversations)
+  // 兼容新旧两种 conversationState 结构
+  const state = 'value' in props.conversationState ? props.conversationState.value : props.conversationState
+  return convertFlatToGrouped(state.conversations)
 })
 
 const emit = defineEmits<{

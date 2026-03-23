@@ -18,6 +18,16 @@ export interface StreamDataHandlerOptions {
 
 const handleDeltaReasoning = (choice: ChatCompletionStreamResponseChoice, lastMessage: Message) => {
   if (typeof choice.delta.reasoning_content === 'string' && choice.delta.reasoning_content) {
+    // 确保 renderContent 存在
+    if (!lastMessage.renderContent || !Array.isArray(lastMessage.renderContent)) {
+      lastMessage.renderContent = []
+    }
+
+    const lastItem = lastMessage.renderContent.at(-1)
+    // 如果当前 renderContent 的最后一项是 loading 类型，清空（只在第一次）
+    if (lastItem?.type === 'loading' || lastItem?.type === 'agent-loading') {
+      lastMessage.renderContent = []
+    }
     if (lastMessage.renderContent.at(-1)?.contentType !== 'reasoning') {
       lastMessage.renderContent.push({
         type: 'collapsible-text',
@@ -39,15 +49,36 @@ const handleDeltaContent = (
   contentType = 'markdown'
 ) => {
   if (typeof choice.delta.content === 'string' && choice.delta.content) {
+    // 确保 renderContent 存在
+    if (!lastMessage.renderContent || !Array.isArray(lastMessage.renderContent)) {
+      lastMessage.renderContent = []
+    }
+
     if (lastMessage.renderContent.at(-1)?.contentType === 'reasoning') {
       lastMessage.renderContent.at(-1)!.status = 'finish'
     }
-    if (lastMessage.renderContent.at(-1)?.type !== contentType) {
-      lastMessage.renderContent.push({ type: contentType, content: '' })
-      lastMessage.content = ''
+    // 如果当前 renderContent 的最后一项是 loading 类型，只在第一次（renderContent 只有这一个 loading 项）时替换
+    const lastItem = lastMessage.renderContent.at(-1)
+    const isLoading = lastItem?.type === 'loading' || lastItem?.type === 'agent-loading'
+    const isFirstContent = isLoading && lastMessage.renderContent.length === 1 && (!lastItem.content || lastItem.content === '')
+    
+    if (isFirstContent) {
+      // 第一次接收到内容，替换 loading
+      lastMessage.renderContent = [{ type: contentType, content: choice.delta.content }]
+      lastMessage.content = choice.delta.content
+    } else if (!lastItem || lastItem?.type !== contentType) {
+      // 如果最后一项类型不匹配，添加新项
+      lastMessage.renderContent.push({ type: contentType, content: choice.delta.content })
+      if (!lastMessage.content) {
+        lastMessage.content = choice.delta.content
+      } else {
+        lastMessage.content += choice.delta.content
+      }
+    } else {
+      // 类型匹配，追加内容
+      lastMessage.renderContent.at(-1)!.content += choice.delta.content
+      lastMessage.content += choice.delta.content
     }
-    lastMessage.renderContent.at(-1)!.content += choice.delta.content
-    lastMessage.content += choice.delta.content
   }
 }
 

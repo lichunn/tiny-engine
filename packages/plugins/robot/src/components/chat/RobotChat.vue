@@ -22,8 +22,8 @@
           @item-click="handlePromptItemClick"
         ></tr-prompts>
       </div>
-      <tr-bubble-provider v-else :content-renderers="contentRenderers">
-        <tr-bubble-list :items="messages" :roles="roles" auto-scroll class="robot-bubble-list"> </tr-bubble-list>
+      <tr-bubble-provider v-else :box-rules="boxRules" :content-rules="contentRules">
+        <tr-bubble-list :messages="messages" :role-configs="roleConfigs" auto-scroll class="robot-bubble-list"> </tr-bubble-list>
       </tr-bubble-provider>
     </div>
 
@@ -39,9 +39,6 @@
           :showWordLimit="false"
           @submit="handleSendMessage"
           @cancel="handleAbortRequest"
-          :allowFiles="selectedAttachments.length < 1 && props.allowFiles"
-          uploadTooltip="支持上传1张图片"
-          @files-selected="handleSingleFilesSelected"
         >
           <template #header v-if="selectedAttachments.length > 0">
             <div>
@@ -55,8 +52,22 @@
               </tr-attachments>
             </div>
           </template>
-          <template #footer-left>
+          <template #footer>
             <slot name="footer-left"></slot>
+          </template>
+          <template #footer-right>
+            <VoiceButton
+              :speech-config="{ lang: 'zh-CN', continuous: false }"
+              @speech-start="handleSpeechStart"
+              @speech-end="handleSpeechEnd"
+              @speech-error="handleSpeechError"
+            />
+            <UploadButton
+              v-if="selectedAttachments.length < 1 && props.allowFiles"
+              accept="image/*"
+              :multiple="false"
+              @select="handleSingleFilesSelected"
+            />
           </template>
         </tr-sender>
       </div>
@@ -74,11 +85,14 @@ import {
   TrSender,
   TrWelcome,
   TrAttachments,
+  UploadButton,
+  VoiceButton,
   type BubbleRoleConfig,
   type PromptProps,
   type RawFileAttachment
 } from '@opentiny/tiny-robot'
-import { type ChatMessage, GeneratingStatus } from '@opentiny/tiny-robot-kit'
+import { type ChatMessage } from '@opentiny/tiny-robot-kit'
+import { GeneratingStatus } from '../../constants/status'
 import { LoadingRenderer, MarkdownRenderer, ImgRenderer } from '../renderers'
 import { useNotify } from '@opentiny/tiny-engine-meta-register'
 
@@ -172,30 +186,72 @@ const handleSingleFileRetry = (file: RawFileAttachment) => {
   handleSingleFilesSelected([file.rawFile], true)
 }
 
+// 语音输入处理
+const handleSpeechStart = () => {
+}
+
+const handleSpeechEnd = (transcript: string) => {
+  if (transcript) {
+    inputMessage.value = transcript
+  }
+}
+
+const handleSpeechError = () => {
+  useNotify({
+    type: 'error',
+    message: '语音识别失败，请重试'
+  })
+}
+
 const getSvgIcon = (name: string, style?: CSSProperties) => {
   return h(resolveComponent('svg-icon'), { name, style: { fontSize: '32px', ...style } })
 }
 const aiAvatar = getSvgIcon('AI')
 const welcomeIcon = getSvgIcon('AI', { fontSize: '48px' })
 
-const contentRenderers = computed(() => ({
-  markdown: MarkdownRenderer,
-  loading: LoadingRenderer,
-  img: ImgRenderer,
-  ...props.bubbleRenderers
-}))
+// const contentRenderers = computed(() => ({
+//   markdown: MarkdownRenderer,
+//   loading: LoadingRenderer,
+//   img: ImgRenderer,
+//   ...props.bubbleRenderers
+// }))
 
-const roles: Record<string, BubbleRoleConfig> = {
+// 0.4.x 使用 match rules 配置渲染器
+const contentRules = computed(() => [
+  {
+    priority: 100,
+    find: (message: any) => message?.renderContent?.[0]?.type === 'markdown' || message?.renderContent?.[0]?.type === 'text',
+    renderer: MarkdownRenderer
+  },
+  {
+    priority: 100,
+    find: (message: any) => message?.renderContent?.[0]?.type === 'img' || message?.renderContent?.[0]?.type === 'image',
+    renderer: ImgRenderer
+  },
+  {
+    priority: 100,
+    find: (message: any) => message?.renderContent?.[0]?.type === 'loading' || message?.renderContent?.[0]?.type === 'agent-loading',
+    renderer: LoadingRenderer
+  },
+  // 支持自定义渲染器
+  ...Object.entries(props.bubbleRenderers).map(([type, renderer]) => ({
+    priority: 50,
+    find: (message: any) => message?.renderContent?.[0]?.type === type,
+    renderer: renderer as any
+  }))
+])
+
+const boxRules = computed(() => [])
+
+const roleConfigs: Record<string, BubbleRoleConfig> = {
   assistant: {
     placement: 'start',
     avatar: aiAvatar,
-    contentRenderer: MarkdownRenderer,
-    customContentField: 'renderContent'
+    contentResolver: (message: any) => message.renderContent || message.content
   },
   user: {
     placement: 'end',
-    contentRenderer: MarkdownRenderer,
-    customContentField: 'renderContent'
+    contentResolver: (message: any) => message.renderContent || message.content
   },
   system: {
     hidden: true

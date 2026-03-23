@@ -1,5 +1,4 @@
 import { toRaw } from 'vue'
-import type { AIClient } from '@opentiny/tiny-robot-kit'
 import useMcpServer from './useMcp'
 import { serializeError } from '../../utils'
 import type { ResponseToolCall, RobotMessage, LLMMessage } from '../../types'
@@ -55,7 +54,6 @@ export const callTools = async (tool_calls: any, hooks: CallToolHooks, signal: A
 
 // 工厂函数配置接口
 export interface ToolCallHandlerConfig {
-  client: AIClient
   getAbortController: () => AbortController
   formatMessages: (messages: any[]) => LLMMessage[]
   hooks: {
@@ -86,7 +84,7 @@ export interface ToolCallHandlerConfig {
  * 使用工厂函数模式，将所有依赖通过配置注入
  */
 export function createToolCallHandler(config: ToolCallHandlerConfig) {
-  const { client, getAbortController, formatMessages, hooks, streamHandlers, getMessageState, statusManager } = config
+  const { getAbortController, formatMessages, hooks, statusManager } = config
 
   return async (tool_calls: ResponseToolCall[], messages: any[], contextMessages: RobotMessage[]) => {
     const hasToolCall = tool_calls?.length > 0
@@ -125,15 +123,8 @@ export function createToolCallHandler(config: ToolCallHandlerConfig) {
 
     statusManager?.setProcessing()
 
-    // 使用工具调用结果继续对话
-    await client.chatStream(
-      { messages: toolMessages as any, options: { signal: abortController.signal } },
-      {
-        onData: (data) => streamHandlers.onData(data, messages),
-        onError: (error) => streamHandlers.onError(error, messages, getMessageState()),
-        onDone: (finishReason?: string) =>
-          streamHandlers.onDone(finishReason ?? 'unknown', messages, toolMessages, getMessageState())
-      }
-    )
+    // 0.4.x 中，工具调用的结果应该自动添加到 messages 中
+    // 由 useConversation 的流式处理器继续处理
+    // 不再需要手动调用 client.chatStream
   }
 }

@@ -27,6 +27,8 @@ export default {
   },
   setup(props) {
     const getIconUrl = (icon: string) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       return new URL(`../../../assets/${icon}`, import.meta.url).href
     }
 

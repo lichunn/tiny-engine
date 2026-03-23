@@ -17,10 +17,10 @@ import { updatePageSchema } from '../core/pageUpdater'
 import useModelConfig from '../core/useConfig'
 import { formatComponents, getAgentSystemPrompt, getJsonFixPrompt } from '../../constants/prompts'
 import { search, fetchAssets } from '../../services/agentServices'
-import { client } from '../../services/aiClient'
+import apiService from '../../services/api'
 import type { ModeHooks } from '../../types/mode.types'
 import { ChatMode } from '../../types/mode.types'
-import { STATUS, type MessageState } from '@opentiny/tiny-robot-kit'
+import { STATUS, type MessageState } from '../../constants/status'
 
 const { deepClone } = utils
 const logger = console
@@ -69,12 +69,19 @@ export default function useAgentMode(): ModeHooks {
 
   // ========== 生命周期钩子 ==========
   const onConversationStart = (conversationState: any, messages: any[], apis: any) => {
-    const conversation = conversationState.conversations.find((item: any) => item.id === conversationState.currentId)
+    const currentId = conversationState.currentId
+    if (!currentId) return
+
+    const conversation = conversationState.conversations.find((item: any) => item.id === currentId)
+    if (!conversation) return
 
     // 确保会话元数据中记录为 Agent 模式
     if (!conversation.metadata?.chatMode || conversation.metadata.chatMode !== ChatMode.Agent) {
-      apis.updateMetadata(conversationState.currentId, { chatMode: ChatMode.Agent })
-      apis.saveConversations()
+      apis.updateMetadata(currentId, { chatMode: ChatMode.Agent })
+      // 0.4.x 中可能不再有 saveConversations 方法，改为可选调用
+      if (typeof apis.saveConversations === 'function') {
+        apis.saveConversations()
+      }
     }
 
     // Agent 模式特殊处理：标记失败的 loading
@@ -133,7 +140,18 @@ export default function useAgentMode(): ModeHooks {
   }
 
   const onStreamStart = (messages: any[]) => {
-    removeLoading(messages)
+    // 0.4.x 迁移：需要手动创建 assistant 消息并设置 loading 类型
+    const lastMessage = messages.at(-1)
+    if (lastMessage?.role === 'assistant') {
+      // 确保 renderContent 存在并设置为 loading 类型
+      if (!lastMessage.renderContent || !Array.isArray(lastMessage.renderContent)) {
+        lastMessage.renderContent = []
+      }
+      // 如果当前没有 renderContent 或 renderContent 为空，添加 loading 类型
+      if (lastMessage.renderContent.length === 0) {
+        lastMessage.renderContent.push({ type: getLoadingType(), content: '' })
+      }
+    }
   }
 
   const onStreamData = (data: object, content: string | object, _messages: any[]) => {
@@ -215,13 +233,29 @@ export default function useAgentMode(): ModeHooks {
         }
         const apiUrl = 'app-center/api/chat/completions'
         lastMessage.renderContent.at(-1).status = 'fix'
-        const fixedResponse = await client.chat({
+        // 0.4.x 迁移：使用 fetch API 替代 client.chat
+        const httpClient = apiService.getHttpClient()
+        const requestParams = beforeRequest({
+          model: '',
+          baseUrl: apiUrl,
           messages: [{ role: 'user', content: getJsonFixPrompt(content, jsonValidResult.error) }],
-          options: { signal: abortControllerMap.errorFix?.signal, beforeRequest: beforeRequest as any, apiUrl }
+          stream: false,
+          apiKey: '',
+          options: { signal: abortControllerMap.errorFix?.signal }
         })
-        if (!isValidJsonPatchObjectString(fixedResponse.choices[0].message.content).isError) {
+        const fixedResponse = await httpClient.request({
+          url: requestParams.baseUrl,
+          method: 'post',
+          data: {
+            model: requestParams.model,
+            messages: requestParams.messages,
+            stream: requestParams.stream
+          },
+          signal: requestParams.options?.signal
+        })
+        if (!isValidJsonPatchObjectString(fixedResponse.data.choices[0].message.content).isError) {
           lastMessage.originContent = lastMessage.content
-          lastMessage.content = fixedResponse.choices[0].message.content
+          lastMessage.content = fixedResponse.data.choices[0].message.content
         }
       } catch (error) {
         logger.error('json fix failed', error)
@@ -250,8 +284,9 @@ export default function useAgentMode(): ModeHooks {
     pageSchema = null
   }
 
-  const onPostCallTools = (toolsResult: Record<string, unknown>[], { currentMessage }: { currentMessage: any }) => {
-    currentMessage.renderContent.push({ type: 'loading', content: '' })
+  const onPostCallTools = (_toolsResult: Record<string, unknown>[], { currentMessage }: { currentMessage: any }) => {
+    // 0.4.x 迁移：确保使用正确的 loading 类型
+    currentMessage.renderContent.push({ type: getLoadingType(), content: '' })
   }
 
   const onConversationEnd = (_conversationId: string) => {
