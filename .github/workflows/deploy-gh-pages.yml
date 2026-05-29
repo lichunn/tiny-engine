@@ -44,7 +44,7 @@ jobs:
           ENV=${{ github.event.inputs.environment || 'alpha' }}
           VITE_ORIGIN_URL="https://agent.bytedev.site/"
           if [ "$ENV" = "production" ]; then
-            VITE_ORIGIN_URL="https://agent.opentiny.design/"
+            VITE_ORIGIN_URL="https://agent.bytedev.site/"
           fi
           cat <<EOF >> designer-demo/env/.env.alpha
           # ---- appended by CI (gh-pages) ----
